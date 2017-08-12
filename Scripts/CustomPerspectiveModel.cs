@@ -37,16 +37,19 @@ namespace WCGL
         static void setMatrix(Transform target, bool enable, ref Matrix4x4 customProj)
         {
             var renderer = target.GetComponent<Renderer>();
-            foreach (var material in renderer.materials)
+            if (renderer != null)
             {
-                if (enable == true)
+                foreach (var material in renderer.materials)
                 {
-                    material.SetFloat("EnableCustomMatrix", 1.0f);
-                    material.SetMatrix("CUSTOM_MATRIX_P", customProj);
-                }
-                else
-                {
-                    material.SetFloat("EnableCustomMatrix", 0.0f);
+                    if (enable == true)
+                    {
+                        material.SetFloat("EnableCustomMatrix", 1.0f);
+                        material.SetMatrix("CUSTOM_MATRIX_P", customProj);
+                    }
+                    else
+                    {
+                        material.SetFloat("EnableCustomMatrix", 0.0f);
+                    }
                 }
             }
 
