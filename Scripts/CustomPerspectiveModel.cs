@@ -6,6 +6,9 @@ namespace WCGL
 {
     public class CustomPerspectiveModel : MonoBehaviour
     {
+        static List<CustomPerspectiveModel> instances = new List<CustomPerspectiveModel>();
+        public static CustomPerspectiveModel[] GetInstances() { return instances.ToArray(); }
+
         public Transform VanishingPoint;
 
         Matrix4x4 createOnePointMatrix(Camera camera)
@@ -31,35 +34,49 @@ namespace WCGL
             return customProj;
         }
 
-        void setMatrix(Matrix4x4 customProj)
+        void setMatrix(bool enable, ref Matrix4x4 customProj)
         {
             var renderer = GetComponent<Renderer>();
             foreach (var material in renderer.materials)
             {
-                material.SetFloat("EnableCustomMatrix", 1.0f);
-                material.SetMatrix("CUSTOM_MATRIX_P", customProj);
+                if (enable == true)
+                {
+                    material.SetFloat("EnableCustomMatrix", 1.0f);
+                    material.SetMatrix("CUSTOM_MATRIX_P", customProj);
+                }
+                else
+                {
+                    material.SetFloat("EnableCustomMatrix", 0.0f);
+                }
             }
         }
 
-        void updateMatrix()
+        public void UpdateMatrix(Camera camera)
         {
-            Matrix4x4 proj = Camera.main.projectionMatrix;
-            if (VanishingPoint != null) proj = createOnePointMatrix(Camera.main);
+            Matrix4x4 proj = camera.projectionMatrix;
+            if (VanishingPoint != null) proj = createOnePointMatrix(camera);
 
             float version = float.Parse(Application.unityVersion.Substring(0, 3));
             bool renderIntoTexture = version >= 5.6f;
             proj = GL.GetGPUProjectionMatrix(proj, renderIntoTexture);
 
-            setMatrix(proj);
+            setMatrix(true, ref proj);
+        }
+
+        public void DisableMatrix()
+        {
+            Matrix4x4 dummy = Matrix4x4.identity;
+            setMatrix(false, ref dummy);
         }
 
         void Start()
         {
+            instances.Add(this);
         }
 
-        void Update()
+        void OnDestroy()
         {
-            updateMatrix();
+            instances.Remove(this);
         }
     }
 }
