@@ -9,14 +9,33 @@ namespace WCGL
         static List<CustomPerspectiveModel> instances = new List<CustomPerspectiveModel>();
         public static CustomPerspectiveModel[] GetInstances() { return instances.ToArray(); }
 
+        public Transform PointOfView;
         public Transform VanishingPoint;
         public Transform Focus;
 
-        Matrix4x4 createOnePointMatrix(Camera camera)
+        Matrix4x4 createEmphasisMatrix(Camera camera)
         {
             Matrix4x4 viewMat = camera.worldToCameraMatrix;
-            Matrix4x4 projMat = camera.projectionMatrix;
+            Vector3 focusPos = (Focus == null) ? transform.position : Focus.position;
+            Vector3 focusView = viewMat.MultiplyPoint3x4(focusPos);
 
+            float pointViewZ = viewMat.MultiplyPoint3x4(PointOfView.position).z;
+            float zLength = pointViewZ - focusView.z; //UnityではCamera座標は右手系
+
+            float halfHeight = -focusView.z * Mathf.Tan(Mathf.Deg2Rad * camera.fieldOfView / 2);
+            float fovY = Mathf.Atan2(halfHeight, zLength) * 2 * Mathf.Rad2Deg;
+
+            float zn = Mathf.Max(0.01f, camera.nearClipPlane + pointViewZ); //クリップ面がマイナスにならないよう対応
+            float zf = camera.farClipPlane + pointViewZ;
+
+            Matrix4x4 viewTranslate = Matrix4x4.Translate(new Vector3(0, 0, -pointViewZ));
+            Matrix4x4 customProj = Matrix4x4.Perspective(fovY, camera.aspect, zn, zf) * viewTranslate;
+
+            return customProj;
+        }
+
+        Matrix4x4 createOnePointMatrix(Matrix4x4 viewMat, Matrix4x4 projMat)
+        {
             Vector3 viewPos = viewMat.MultiplyPoint3x4(VanishingPoint.position);
             Vector3 focusPos = (Focus == null) ? transform.position : Focus.position;
 
@@ -63,7 +82,15 @@ namespace WCGL
         public void UpdateMatrix(Camera camera)
         {
             Matrix4x4 proj = camera.projectionMatrix;
-            if (VanishingPoint != null) proj = createOnePointMatrix(camera);
+            if (PointOfView != null)
+            {
+                proj = createEmphasisMatrix(camera);
+            }
+
+            if (VanishingPoint != null)
+            {
+                proj = createOnePointMatrix(camera.worldToCameraMatrix, proj);
+            }
 
             float version = float.Parse(Application.unityVersion.Substring(0, 3));
             bool renderIntoTexture = version >= 5.6f;

@@ -5,6 +5,7 @@ float4 ObjectToCustomClipPos(float4 local)
 {
 	float4 proj = mul(CUSTOM_MATRIX_P, mul(UNITY_MATRIX_MV, local));
 	float4 unityProj = UnityObjectToClipPos(local);
+	proj.z = unityProj.z / unityProj.w * proj.w;
 
 	return lerp(unityProj, proj, EnableCustomMatrix);
 }
