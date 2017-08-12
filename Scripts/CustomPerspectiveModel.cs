@@ -10,6 +10,7 @@ namespace WCGL
         public static CustomPerspectiveModel[] GetInstances() { return instances.ToArray(); }
 
         public Transform VanishingPoint;
+        public Transform Focus;
 
         Matrix4x4 createOnePointMatrix(Camera camera)
         {
@@ -17,7 +18,7 @@ namespace WCGL
             Matrix4x4 projMat = camera.projectionMatrix;
 
             Vector3 viewPos = viewMat.MultiplyPoint3x4(VanishingPoint.position);
-            Vector3 focusPos = this.transform.position;
+            Vector3 focusPos = (Focus == null) ? transform.position : Focus.position;
 
             float viewZ = viewMat.MultiplyPoint3x4(focusPos).z;
             viewPos *= viewZ / viewPos.z;
