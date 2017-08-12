@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace WCGL
 {
+    [ExecuteInEditMode]
     public class CustomPerspectiveModel : MonoBehaviour
     {
         public enum EmphasisMode { PointOfView, FocalLength};
@@ -18,6 +19,8 @@ namespace WCGL
         public Transform VanishingPoint;
         [Space]
         public Transform Focus;
+
+        MaterialCache materialChace = new MaterialCache();
 
         Matrix4x4 createEmphasisMatrix(Camera camera)
         {
@@ -69,12 +72,13 @@ namespace WCGL
             return customProj;
         }
 
-        static void setMatrix(Transform target, bool enable, ref Matrix4x4 customProj)
+        void setMatrix(Transform target, bool enable, ref Matrix4x4 customProj)
         {
             var renderer = target.GetComponent<Renderer>();
             if (renderer != null)
             {
-                foreach (var material in renderer.materials)
+                var mateials = materialChace.GetMaterials(renderer, enable);
+                foreach (var material in mateials)
                 {
                     if (enable == true)
                     {
@@ -118,6 +122,11 @@ namespace WCGL
         {
             Matrix4x4 dummy = Matrix4x4.identity;
             setMatrix(transform, false, ref dummy);
+        }
+
+        void Reset()
+        {
+            instances.Add(this);
         }
 
         void Start()

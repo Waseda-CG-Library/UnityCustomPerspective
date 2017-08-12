@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace WCGL
 {
+    [ExecuteInEditMode]
     public class CustomPerspectiveCamera : MonoBehaviour
     {
         void OnPreRender()
