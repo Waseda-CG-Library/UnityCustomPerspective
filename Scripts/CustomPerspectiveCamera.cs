@@ -7,6 +7,10 @@ namespace WCGL
     [ExecuteInEditMode]
     public class CustomPerspectiveCamera : MonoBehaviour
     {
+        private void Start() //for Inspector's Enabled
+        {
+        }
+
         void OnPreRender()
         {
             foreach (var cpm in CustomPerspectiveModel.GetInstances())
