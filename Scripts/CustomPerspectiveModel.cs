@@ -6,11 +6,17 @@ namespace WCGL
 {
     public class CustomPerspectiveModel : MonoBehaviour
     {
+        public enum EmphasisMode { PointOfView, FocalLength};
+
         static List<CustomPerspectiveModel> instances = new List<CustomPerspectiveModel>();
         public static CustomPerspectiveModel[] GetInstances() { return instances.ToArray(); }
 
+        public EmphasisMode EmphasisType;
         public Transform PointOfView;
+        public float FocalLength = 50;
+        [Space]
         public Transform VanishingPoint;
+        [Space]
         public Transform Focus;
 
         Matrix4x4 createEmphasisMatrix(Camera camera)
@@ -19,11 +25,20 @@ namespace WCGL
             Vector3 focusPos = (Focus == null) ? transform.position : Focus.position;
             Vector3 focusView = viewMat.MultiplyPoint3x4(focusPos);
 
-            float pointViewZ = viewMat.MultiplyPoint3x4(PointOfView.position).z;
-            float zLength = pointViewZ - focusView.z; //UnityではCamera座標は右手系
-
-            float halfHeight = -focusView.z * Mathf.Tan(Mathf.Deg2Rad * camera.fieldOfView / 2);
-            float fovY = Mathf.Atan2(halfHeight, zLength) * 2 * Mathf.Rad2Deg;
+            float pointViewZ, fovY;
+            float tanHalfFovY = Mathf.Tan(Mathf.Deg2Rad * camera.fieldOfView / 2.0f);
+            if (EmphasisType == EmphasisMode.PointOfView)
+            {
+                pointViewZ = viewMat.MultiplyPoint3x4(PointOfView.position).z;
+                float zLength = pointViewZ - focusView.z; //UnityではCamera座標は右手系
+                float halfHeight = -focusView.z * tanHalfFovY;
+                fovY = Mathf.Atan2(halfHeight, zLength) * 2 * Mathf.Rad2Deg;
+            }
+            else
+            {
+                pointViewZ = focusView.z - FocalLength * focusView.z * tanHalfFovY / 12.0f;
+                fovY = Mathf.Atan2(12.0f, FocalLength) * 2 * Mathf.Rad2Deg;
+            }
 
             float zn = Mathf.Max(0.01f, camera.nearClipPlane + pointViewZ); //クリップ面がマイナスにならないよう対応
             float zf = camera.farClipPlane + pointViewZ;
@@ -82,7 +97,7 @@ namespace WCGL
         public void UpdateMatrix(Camera camera)
         {
             Matrix4x4 proj = camera.projectionMatrix;
-            if (PointOfView != null)
+            if (PointOfView != null || EmphasisType == EmphasisMode.FocalLength)
             {
                 proj = createEmphasisMatrix(camera);
             }
