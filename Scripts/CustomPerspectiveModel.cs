@@ -72,7 +72,7 @@ namespace WCGL
             return customProj;
         }
 
-        void setMatrix(Transform target, bool enable, ref Matrix4x4 customProj)
+        void setMatrix(Transform target, bool enable, ref Matrix4x4 customProj, ref Matrix4x4 invVP)
         {
             var renderer = target.GetComponent<Renderer>();
             if (renderer != null)
@@ -84,6 +84,7 @@ namespace WCGL
                     {
                         material.SetFloat("EnableCustomMatrix", 1.0f);
                         material.SetMatrix("CUSTOM_MATRIX_P", customProj);
+                        material.SetMatrix("MATRIX_I_VP", invVP);
                     }
                     else
                     {
@@ -94,7 +95,7 @@ namespace WCGL
 
             foreach(Transform child in target)
             {
-                setMatrix(child, enable, ref customProj);
+                setMatrix(child, enable, ref customProj, ref invVP);
             }
         }
 
@@ -115,13 +116,16 @@ namespace WCGL
             bool renderIntoTexture = version >= 5.6f;
             proj = GL.GetGPUProjectionMatrix(proj, renderIntoTexture);
 
-            setMatrix(transform, true, ref proj);
+            Matrix4x4 unityProj = GL.GetGPUProjectionMatrix(camera.projectionMatrix, renderIntoTexture);
+            Matrix4x4 invVP = (unityProj * camera.worldToCameraMatrix).inverse;
+
+            setMatrix(transform, true, ref proj, ref invVP);
         }
 
         public void DisableMatrix()
         {
             Matrix4x4 dummy = Matrix4x4.identity;
-            setMatrix(transform, false, ref dummy);
+            setMatrix(transform, false, ref dummy, ref dummy);
         }
 
         void Reset()
