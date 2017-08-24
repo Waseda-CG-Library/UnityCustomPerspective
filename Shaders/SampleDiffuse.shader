@@ -50,4 +50,6 @@
 			ENDCG
 		}
 	}
+
+	Fallback "Hidden/CustomPerspective/Vertex"
 }
