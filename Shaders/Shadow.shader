@@ -39,7 +39,7 @@ Shader "Hidden/CustomPerspective/Vertex" {
 			#pragma multi_compile_shadowcaster
 			#pragma multi_compile_instancing // allow instanced shadow pass for most of the shaders
 			#include "UnityCG.cginc"
-			#include "CustomMatrix.cginc"
+			#include "CustomPerspective.cginc"
 
 			struct v2f {
 				V2F_SHADOW_CASTER;
