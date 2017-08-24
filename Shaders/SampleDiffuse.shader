@@ -16,6 +16,7 @@
 			#include "UnityCG.cginc"
 			#include "UnityLightingCommon.cginc"
 
+			#pragma multi_compile CUSTOM_PERSPECTIVE_OFF CUSTOM_PERSPECTIVE_ON
 			#include "CustomPerspective.cginc"
 
 			struct v2f

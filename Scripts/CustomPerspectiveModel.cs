@@ -82,13 +82,13 @@ namespace WCGL
                 {
                     if (enable == true)
                     {
-                        material.SetFloat("EnableCustomPerspective", 1.0f);
+                        material.EnableKeyword("CUSTOM_PERSPECTIVE_ON");
                         material.SetMatrix("CUSTOM_MATRIX_P", customProj);
                         material.SetMatrix("MATRIX_I_VP", invVP);
                     }
                     else
                     {
-                        material.SetFloat("EnableCustomPerspective", 0.0f);
+                        material.DisableKeyword("CUSTOM_PERSPECTIVE_ON");
                     }
                 }
             }
