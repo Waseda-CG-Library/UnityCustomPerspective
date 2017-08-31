@@ -11,7 +11,10 @@ float4 _ObjectToCustomClipPos(float4 local)
 float4 ObjectToCustomClipPos(float4 local)
 {
 	#ifdef CUSTOM_PERSPECTIVE_ON
-		return _ObjectToCustomClipPos(local);
+		float4 proj = mul(CUSTOM_MATRIX_P, mul(UNITY_MATRIX_MV, local));
+		float4 unityProj = UnityObjectToClipPos(local);
+		proj.z = unityProj.z / unityProj.w * proj.w;
+		return proj;
 	#else
 		return UnityObjectToClipPos(local);
 	#endif
