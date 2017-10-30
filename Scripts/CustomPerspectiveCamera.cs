@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace WCGL
 {
@@ -13,17 +14,17 @@ namespace WCGL
 
         void OnPreRender()
         {
-            foreach (var cpm in CustomPerspectiveModel.GetInstances())
+            foreach (var cpm in CustomPerspectiveModel.GetInstances().Distinct())
             {
-                if (cpm.isActiveAndEnabled) { cpm.UpdateMatrix(Camera.current); }
+                if (cpm != null && cpm.isActiveAndEnabled) { cpm.UpdateMatrix(Camera.current); }
             }
         }
 
         private void OnPostRender()
         {
-            foreach (var cpm in CustomPerspectiveModel.GetInstances())
+            foreach (var cpm in CustomPerspectiveModel.GetInstances().Distinct())
             {
-                if (cpm.isActiveAndEnabled) { cpm.DisableMatrix(); }
+                if (cpm != null && cpm.isActiveAndEnabled) { cpm.DisableMatrix(); }
             }
         }
     }
