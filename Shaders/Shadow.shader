@@ -55,9 +55,12 @@ Shader "Hidden/CustomPerspective/Vertex" {
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
 
-				float4 proj = ObjectToCustomClipPos(v.vertex);
-				// UNITY_MATRIX_P[3][3] == 1 : Directional light shadow map
-				o.pos = lerp(proj, o.pos, UNITY_MATRIX_P[3][3]);
+				#ifdef CUSTOM_PERSPECTIVE_ON
+				if (!any(unity_LightShadowBias)) //DepthTexture
+				{
+					o.pos = ObjectToCustomClipPos(v.vertex);
+				}
+				#endif
 
 				return o;
 			}
