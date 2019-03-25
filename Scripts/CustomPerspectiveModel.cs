@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace WCGL
@@ -20,7 +19,7 @@ namespace WCGL
         [Space]
         public Transform Focus;
 
-        MaterialCache materialChace = new MaterialCache();
+        public HashSet<CustomPerspectiveMesh> Meshes { get; private set; } = new HashSet<CustomPerspectiveMesh>();
 
         Matrix4x4 createEmphasisMatrix(Camera camera)
         {
@@ -72,33 +71,6 @@ namespace WCGL
             return customProj;
         }
 
-        void setMatrix(Transform target, bool enable, ref Matrix4x4 customProj, ref Matrix4x4 invVP)
-        {
-            var renderer = target.GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                var mateials = materialChace.GetMaterials(renderer, enable);
-                foreach (var material in mateials)
-                {
-                    if (enable == true)
-                    {
-                        material.EnableKeyword("CUSTOM_PERSPECTIVE_ON");
-                        material.SetMatrix("CUSTOM_MATRIX_P", customProj);
-                        material.SetMatrix("MATRIX_I_VP", invVP);
-                    }
-                    else
-                    {
-                        material.DisableKeyword("CUSTOM_PERSPECTIVE_ON");
-                    }
-                }
-            }
-
-            foreach(Transform child in target)
-            {
-                setMatrix(child, enable, ref customProj, ref invVP);
-            }
-        }
-
         public void UpdateMatrix(Camera camera)
         {
             Matrix4x4 proj = camera.projectionMatrix;
@@ -119,13 +91,18 @@ namespace WCGL
             Matrix4x4 unityProj = GL.GetGPUProjectionMatrix(camera.projectionMatrix, renderIntoTexture);
             Matrix4x4 invVP = (unityProj * camera.worldToCameraMatrix).inverse;
 
-            setMatrix(transform, true, ref proj, ref invVP);
+            foreach (var mesh in Meshes)
+            {
+                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref proj, ref invVP);
+            }
         }
 
         public void DisableMatrix()
         {
-            Matrix4x4 dummy = Matrix4x4.identity;
-            setMatrix(transform, false, ref dummy, ref dummy);
+            foreach (var mesh in Meshes)
+            {
+                if (mesh.isActiveAndEnabled) mesh.disableCustomMatrix();
+            }
         }
 
         void Reset()
