@@ -9,42 +9,44 @@ namespace WCGL
         [SerializeField] CustomPerspectiveModel customPerspectiveModel;
 #pragma warning restore 649
 
-        new Renderer renderer;
+        public Renderer Renderer { get; private set; }
         MaterialCache materialChace = new MaterialCache();
 
-        public void enableCustomMatrix(ref Matrix4x4 customProj, ref Matrix4x4 invVP)
+        public void enableCustomMatrix(ref Matrix4x4 customProj, ref Matrix4x4 invVP, Texture screenSpaceShadowMap)
         {
-            if (renderer == null) return;
+            if (Renderer == null) return;
 
-            var mateials = materialChace.GetMaterials(renderer, true);
+            var mateials = materialChace.GetMaterials(Renderer, true);
             foreach (var material in mateials)
             {
                 material.EnableKeyword("CUSTOM_PERSPECTIVE_ON");
                 material.SetMatrix("CUSTOM_MATRIX_P", customProj);
                 material.SetMatrix("MATRIX_I_VP", invVP);
+                material.SetTexture("_ShadowMapTexture", screenSpaceShadowMap);
             }
         }
 
         public void disableCustomMatrix()
         {
-            if (renderer == null) return;
+            if (Renderer == null) return;
 
-            var mateials = materialChace.GetMaterials(renderer, false);
+            var mateials = materialChace.GetMaterials(Renderer, false);
             foreach (var material in mateials)
             {
                 material.DisableKeyword("CUSTOM_PERSPECTIVE_ON");
+                material.SetTexture("_ShadowMapTexture", null);
             }
         }
 
         void Reset()
         {
-            renderer = GetComponent<Renderer>();
+            Renderer = GetComponent<Renderer>();
             if (customPerspectiveModel != null) customPerspectiveModel.Meshes.Add(this);
         }
 
         void Start()
         {
-            renderer = GetComponent<Renderer>();
+            Renderer = GetComponent<Renderer>();
             if (customPerspectiveModel != null) customPerspectiveModel.Meshes.Add(this);
         }
 
