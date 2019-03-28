@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace WCGL
@@ -9,7 +10,10 @@ namespace WCGL
         public enum EmphasisMode { PointOfView, FocalLength};
 
         static List<CustomPerspectiveModel> instances = new List<CustomPerspectiveModel>();
-        public static CustomPerspectiveModel[] GetInstances() { return instances.ToArray(); }
+        public static CustomPerspectiveModel[] GetActiveInstances()
+        {
+            return instances.Distinct().Where(cpm => cpm?.isActiveAndEnabled == true).ToArray();
+        }
 
         public EmphasisMode EmphasisType;
         public Transform PointOfView;

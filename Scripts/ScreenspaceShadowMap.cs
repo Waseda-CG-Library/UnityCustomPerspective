@@ -69,10 +69,8 @@ namespace WCGL
             commad.SetRenderTarget(viewPosTexture);
             commad.ClearRenderTarget(true, true, Color.clear);
 
-            foreach (var cpm in CustomPerspectiveModel.GetInstances().Distinct())
+            foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
-                if (cpm == null || cpm.isActiveAndEnabled == false) continue;
-
                 viewPosMaterial.SetMatrix("CUSTOM_MATRIX_P", cpm.CustomMatrix);
                 foreach (var mesh in cpm.Meshes)
                 {

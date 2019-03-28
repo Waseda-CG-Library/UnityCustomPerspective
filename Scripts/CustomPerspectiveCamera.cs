@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Linq;
 
 namespace WCGL
 {
@@ -18,25 +17,25 @@ namespace WCGL
 
         void OnPreRender()
         {
-            foreach (var cpm in CustomPerspectiveModel.GetInstances().Distinct())
+            foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
-                if (cpm != null && cpm.isActiveAndEnabled) { cpm.UpdateMatrix(camera); }
+                cpm.UpdateMatrix(camera);
             }
 
             if (screenspaceShadowMap == null) Start();
             var shadowTexture = screenspaceShadowMap.updateBuffer(camera);
 
-            foreach (var cpm in CustomPerspectiveModel.GetInstances().Distinct())
+            foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
-                if (cpm != null && cpm.isActiveAndEnabled){ cpm.EnableMatrix(camera, shadowTexture); }
+                cpm.EnableMatrix(camera, shadowTexture);
             }
         }
 
         void OnPostRender()
         {
-            foreach (var cpm in CustomPerspectiveModel.GetInstances().Distinct())
+            foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
-                if (cpm != null && cpm.isActiveAndEnabled) { cpm.DisableMatrix(); }
+                cpm.DisableMatrix();
             }
         }
 
