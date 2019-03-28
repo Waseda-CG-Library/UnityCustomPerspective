@@ -23,25 +23,35 @@ namespace WCGL
 
             var viewPosShader = Shader.Find("Hidden/CustomPerspective/ViewPos");
             viewPosMaterial = new Material(viewPosShader);
-            viewPosMaterial.name = "CustomPerspective ViewPos";
 
             var shadowShader = Shader.Find("Hidden/CustomPerspective/Internal-ScreenSpaceShadows");
             shadowMaterial = new Material(shadowShader);
-            shadowShader.name = "CustomPerspective Screenspace ShadowMap";
 
-            light = Object.FindObjectOfType<Light>();
+            light = Object.FindObjectsOfType<Light>().FirstOrDefault(l => l.type == LightType.Directional);
+            if(light != null)
+            {
+                var textureSize = getTexelSize(light);
+                shadowMaterial.SetVector("_ShadowMapTexture_TexelSize", textureSize);
+            }
 
             resetTexture(camera);
         }
 
+        static Vector4 getTexelSize(Light light)
+        {
+            int type = (int)light.shadowResolution;
+            if (type == (int)LightShadowResolution.FromQualitySettings) type = (int)QualitySettings.shadowResolution;
+
+            float size = 512 * Mathf.Pow(2, type);
+            return new Vector4(1 / size, 1 / size, size, size);
+        }
+
         void resetTexture(Camera camera)
         {
-            var desc = new RenderTextureDescriptor(camera.pixelWidth, camera.scaledPixelHeight, RenderTextureFormat.ARGBHalf, 16);
-            viewPosTexture = new RenderTexture(desc);
+            viewPosTexture = new RenderTexture(camera.pixelWidth, camera.scaledPixelHeight, 16, RenderTextureFormat.ARGBHalf);
             viewPosTexture.name = "CustomPerspective_ViewPos";
 
-            desc.colorFormat = RenderTextureFormat.ARGB32;
-            shadowTexture = new RenderTexture(desc);
+            shadowTexture = new RenderTexture(camera.pixelWidth, camera.scaledPixelHeight, 0, RenderTextureFormat.ARGB32);
             shadowTexture.name = "CustomPerspective_ScreenspaceShadowMap";
 
             shadowMaterial.SetTexture("ViewPosTexture", viewPosTexture);
