@@ -1,31 +1,52 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
+﻿using UnityEngine;
 
 namespace WCGL
 {
     [ExecuteInEditMode]
     public class CustomPerspectiveCamera : MonoBehaviour
     {
-        private void Start() //for Inspector's Enabled
+        new Camera camera;
+        ScreenspaceShadowMap screenspaceShadowMap;
+
+        void Start()
         {
+            camera = GetComponent<Camera>();
+            screenspaceShadowMap = new ScreenspaceShadowMap(camera);
+            screenspaceShadowMap.enableCommandBuffer(camera);
         }
 
         void OnPreRender()
         {
-            foreach (var cpm in CustomPerspectiveModel.GetInstances().Distinct())
+            foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
-                if (cpm != null && cpm.isActiveAndEnabled) { cpm.UpdateMatrix(Camera.current); }
+                cpm.UpdateMatrix(camera);
+            }
+
+            if (screenspaceShadowMap == null) Start();
+            var shadowTexture = screenspaceShadowMap.updateBuffer(camera);
+
+            foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
+            {
+                cpm.EnableMatrix(camera, shadowTexture);
             }
         }
 
-        private void OnPostRender()
+        void OnPostRender()
         {
-            foreach (var cpm in CustomPerspectiveModel.GetInstances().Distinct())
+            foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
-                if (cpm != null && cpm.isActiveAndEnabled) { cpm.DisableMatrix(); }
+                cpm.DisableMatrix();
             }
+        }
+
+        void OnEnable()
+        {
+            screenspaceShadowMap?.enableCommandBuffer(camera);
+        }
+
+        void OnDisable()
+        {
+            screenspaceShadowMap?.disableCommandBuffer(camera);
         }
     }
 }

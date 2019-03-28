@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace WCGL
@@ -9,7 +10,10 @@ namespace WCGL
         public enum EmphasisMode { PointOfView, FocalLength};
 
         static List<CustomPerspectiveModel> instances = new List<CustomPerspectiveModel>();
-        public static CustomPerspectiveModel[] GetInstances() { return instances.ToArray(); }
+        public static CustomPerspectiveModel[] GetActiveInstances()
+        {
+            return instances.Distinct().Where(cpm => cpm?.isActiveAndEnabled == true).ToArray();
+        }
 
         public EmphasisMode EmphasisType;
         public Transform PointOfView;
@@ -20,6 +24,7 @@ namespace WCGL
         public Transform Focus;
 
         public HashSet<CustomPerspectiveMesh> Meshes { get; private set; } = new HashSet<CustomPerspectiveMesh>();
+        public Matrix4x4 CustomMatrix { get; private set; }
 
         Matrix4x4 createEmphasisMatrix(Camera camera)
         {
@@ -86,14 +91,20 @@ namespace WCGL
 
             float version = float.Parse(Application.unityVersion.Substring(0, 3));
             bool renderIntoTexture = version >= 5.6f;
-            proj = GL.GetGPUProjectionMatrix(proj, renderIntoTexture);
+            CustomMatrix = GL.GetGPUProjectionMatrix(proj, renderIntoTexture);
+        }
 
+        public void EnableMatrix(Camera camera, Texture screenSpaceShadowMap)
+        {
+            float version = float.Parse(Application.unityVersion.Substring(0, 3));
+            bool renderIntoTexture = version >= 5.6f;
             Matrix4x4 unityProj = GL.GetGPUProjectionMatrix(camera.projectionMatrix, renderIntoTexture);
             Matrix4x4 invVP = (unityProj * camera.worldToCameraMatrix).inverse;
 
+            var proj = CustomMatrix;
             foreach (var mesh in Meshes)
             {
-                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref proj, ref invVP);
+                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref proj, ref invVP, screenSpaceShadowMap);
             }
         }
 
