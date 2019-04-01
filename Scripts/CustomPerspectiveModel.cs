@@ -25,8 +25,9 @@ namespace WCGL
 
         public HashSet<CustomPerspectiveMesh> Meshes { get; private set; } = new HashSet<CustomPerspectiveMesh>();
         public Matrix4x4 CustomMatrix { get; private set; }
+        Vector3 viewDirectionCorrectWorld;
 
-        Matrix4x4 createEmphasisMatrix(Camera camera)
+        (Matrix4x4, float) createEmphasisMatrix(Camera camera)
         {
             Matrix4x4 viewMat = camera.worldToCameraMatrix;
             Vector3 focusPos = (Focus == null) ? transform.position : Focus.position;
@@ -53,10 +54,10 @@ namespace WCGL
             Matrix4x4 viewTranslate = Matrix4x4.Translate(new Vector3(0, 0, -pointViewZ));
             Matrix4x4 customProj = Matrix4x4.Perspective(fovY, camera.aspect, zn, zf) * viewTranslate;
 
-            return customProj;
+            return (customProj, -pointViewZ);
         }
 
-        Matrix4x4 createOnePointMatrix(Matrix4x4 viewMat, Matrix4x4 projMat)
+        (Matrix4x4, Vector2) createOnePointMatrix(Matrix4x4 viewMat, Matrix4x4 projMat)
         {
             Vector3 viewPos = viewMat.MultiplyPoint3x4(VanishingPoint.position);
             Vector3 focusPos = (Focus == null) ? transform.position : Focus.position;
@@ -73,25 +74,30 @@ namespace WCGL
             Matrix4x4 transProj = Matrix4x4.Translate(projPos);
             Matrix4x4 customProj = transProj * projMat * transView;
 
-            return customProj;
+            return (customProj, -viewPos);
         }
 
         public void UpdateMatrix(Camera camera)
         {
             Matrix4x4 proj = camera.projectionMatrix;
+            float viewZ = 0.0f;
             if (PointOfView != null || EmphasisType == EmphasisMode.FocalLength)
             {
-                proj = createEmphasisMatrix(camera);
+                (proj, viewZ) = createEmphasisMatrix(camera);
             }
 
+            Vector2 viewXY = Vector2.zero;
             if (VanishingPoint != null)
             {
-                proj = createOnePointMatrix(camera.worldToCameraMatrix, proj);
+                (proj, viewXY) = createOnePointMatrix(camera.worldToCameraMatrix, proj);
             }
 
             float version = float.Parse(Application.unityVersion.Substring(0, 3));
             bool renderIntoTexture = version >= 5.6f;
             CustomMatrix = GL.GetGPUProjectionMatrix(proj, renderIntoTexture);
+
+            var viewXYZW = new Vector4(viewXY.x, viewXY.y, viewZ, 0);
+            viewDirectionCorrectWorld = camera.cameraToWorldMatrix.MultiplyVector(viewXYZW);
         }
 
         public void EnableMatrix(Camera camera, Texture screenSpaceShadowMap)
@@ -104,7 +110,7 @@ namespace WCGL
             var proj = CustomMatrix;
             foreach (var mesh in Meshes)
             {
-                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref proj, ref invVP, screenSpaceShadowMap);
+                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref proj, ref invVP, ref viewDirectionCorrectWorld, screenSpaceShadowMap);
             }
         }
 

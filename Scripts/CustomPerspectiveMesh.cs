@@ -12,7 +12,7 @@ namespace WCGL
         public Renderer Renderer { get; private set; }
         MaterialCache materialChace = new MaterialCache();
 
-        public void enableCustomMatrix(ref Matrix4x4 customProj, ref Matrix4x4 invVP, Texture screenSpaceShadowMap)
+        public void enableCustomMatrix(ref Matrix4x4 customProj, ref Matrix4x4 invVP, ref Vector3 viewDirectionCorrectWorld, Texture screenSpaceShadowMap)
         {
             if (Renderer == null) return;
 
@@ -23,6 +23,7 @@ namespace WCGL
                 material.SetMatrix("CUSTOM_MATRIX_P", customProj);
                 material.SetMatrix("MATRIX_I_VP", invVP);
                 material.SetTexture("_ShadowMapTexture", screenSpaceShadowMap);
+                material.SetVector("ViewDirectionCorrectWorld", viewDirectionCorrectWorld);
             }
         }
 
