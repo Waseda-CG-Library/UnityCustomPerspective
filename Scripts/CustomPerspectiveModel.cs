@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace WCGL
 {
@@ -26,7 +27,9 @@ namespace WCGL
         [SerializeField] bool correctRimLight = true;
 
         public HashSet<CustomPerspectiveMesh> Meshes { get; private set; } = new HashSet<CustomPerspectiveMesh>();
-        public Matrix4x4 CustomMatrix { get; private set; }
+        protected Matrix4x4 CustomMatrix { get; private set; }
+        public Matrix4x4 CustomMatrixGL { get; private set; }
+
         public Material ViewPosMaterial { get; private set; }
         Vector3 viewDirectionCorrectWorld;
 
@@ -82,39 +85,42 @@ namespace WCGL
 
         public void UpdateMatrix(Camera camera)
         {
-            Matrix4x4 proj = camera.projectionMatrix;
+            CustomMatrix = camera.projectionMatrix;
             float viewZ = 0.0f;
             if (PointOfView != null || EmphasisType == EmphasisMode.FocalLength)
             {
-                (proj, viewZ) = createEmphasisMatrix(camera);
+                (CustomMatrix, viewZ) = createEmphasisMatrix(camera);
             }
 
             Vector2 viewXY = Vector2.zero;
             if (VanishingPoint != null)
             {
-                (proj, viewXY) = createOnePointMatrix(camera.worldToCameraMatrix, proj);
+                (CustomMatrix, viewXY) = createOnePointMatrix(camera.worldToCameraMatrix, CustomMatrix);
             }
 
             float version = float.Parse(Application.unityVersion.Substring(0, 3));
             bool renderIntoTexture = version >= 5.6f;
-            CustomMatrix = GL.GetGPUProjectionMatrix(proj, renderIntoTexture);
+            CustomMatrixGL = GL.GetGPUProjectionMatrix(CustomMatrix, renderIntoTexture);
 
             var viewXYZW = new Vector4(viewXY.x, viewXY.y, viewZ, 0);
             viewDirectionCorrectWorld = camera.cameraToWorldMatrix.MultiplyVector(viewXYZW);
         }
 
-        public void EnableMatrix(Camera camera, Texture screenSpaceShadowMap)
+        public void EnableMatrix(Camera camera, Texture screenSpaceShadowMap,
+            CommandBuffer afterOpaque, CommandBuffer afterAlpha)
         {
             float version = float.Parse(Application.unityVersion.Substring(0, 3));
             bool renderIntoTexture = version >= 5.6f;
             Matrix4x4 unityProj = GL.GetGPUProjectionMatrix(camera.projectionMatrix, renderIntoTexture);
             Matrix4x4 invVP = (unityProj * camera.worldToCameraMatrix).inverse;
 
-            var proj = CustomMatrix;
+            var _customMatrix = CustomMatrix;
+            var _customMatrixGL = CustomMatrixGL;
             foreach (var mesh in Meshes)
             {
-                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref proj, ref invVP, ref viewDirectionCorrectWorld,
-                    screenSpaceShadowMap, correctShadow, correctRimLight);
+                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref _customMatrix, camera,
+                    ref _customMatrixGL,ref invVP, ref viewDirectionCorrectWorld,
+                    screenSpaceShadowMap, afterOpaque, afterAlpha, correctShadow, correctRimLight);
             }
         }
 

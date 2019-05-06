@@ -68,7 +68,7 @@ namespace WCGL
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
                 var viewPosMaterial = cpm.ViewPosMaterial;
-                viewPosMaterial.SetMatrix("CUSTOM_MATRIX_P", cpm.CustomMatrix);
+                viewPosMaterial.SetMatrix("CUSTOM_MATRIX_P", cpm.CustomMatrixGL);
                 foreach (var mesh in cpm.Meshes)
                 {
                     if (mesh.isActiveAndEnabled == false) continue;
