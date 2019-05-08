@@ -9,7 +9,6 @@ namespace WCGL
         CommandBuffer commad;
 
         RenderTexture viewPosTexture;
-        Material viewPosMaterial;
 
         RenderTexture shadowTexture;
         Material shadowMaterial;
@@ -20,9 +19,6 @@ namespace WCGL
         {
             commad = new CommandBuffer();
             commad.name = "CustomPerspective Meshes ViewPos";
-
-            var viewPosShader = Shader.Find("Hidden/CustomPerspective/ViewPos");
-            viewPosMaterial = new Material(viewPosShader);
 
             var shadowShader = Shader.Find("Hidden/CustomPerspective/Internal-ScreenSpaceShadows");
             shadowMaterial = new Material(shadowShader);
@@ -71,6 +67,7 @@ namespace WCGL
 
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
+                var viewPosMaterial = cpm.ViewPosMaterial;
                 viewPosMaterial.SetMatrix("CUSTOM_MATRIX_P", cpm.CustomMatrix);
                 foreach (var mesh in cpm.Meshes)
                 {
