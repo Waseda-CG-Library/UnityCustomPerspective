@@ -5,9 +5,15 @@ namespace WCGL
 {
     public class MaterialCache
     {
-        Dictionary<Renderer, Material[]> sharedMaterials = new Dictionary<Renderer, Material[]>();
+        Material[] sharedMaterialsCache = null;
+        Renderer renderer;
 
-        public Material[] GetMaterials(Renderer renderer, bool enableCustomPerspective)
+        public MaterialCache(Renderer _renderer)
+        {
+            this.renderer = _renderer;
+        }
+
+        public Material[] GetMaterials(bool enableCustomPerspective)
         {
             if (Application.isPlaying == true) return renderer.materials;
 
@@ -27,13 +33,13 @@ namespace WCGL
                     tempMaterials[i] = new Material(sharedMaterials[i]);
                 }
                 renderer.materials = tempMaterials;
-                this.sharedMaterials[renderer] = sharedMaterials;
+                this.sharedMaterialsCache = sharedMaterials;
                 return tempMaterials;
             }
             else
             {
-                renderer.sharedMaterials = this.sharedMaterials[renderer];
-                this.sharedMaterials.Remove(renderer);
+                renderer.sharedMaterials = this.sharedMaterialsCache;
+                this.sharedMaterialsCache = null;
                 return renderer.sharedMaterials;
             }
         }

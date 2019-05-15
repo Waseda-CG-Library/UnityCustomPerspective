@@ -10,13 +10,13 @@ namespace WCGL
 #pragma warning restore 649
 
         public Renderer Renderer { get; private set; }
-        MaterialCache materialChace = new MaterialCache();
+        MaterialCache materialChace;
 
         public void enableCustomMatrix(ref Matrix4x4 customProj, ref Matrix4x4 invVP, ref Vector3 viewDirectionCorrectWorld, Texture screenSpaceShadowMap)
         {
             if (Renderer == null) return;
 
-            var mateials = materialChace.GetMaterials(Renderer, true);
+            var mateials = materialChace.GetMaterials(true);
             foreach (var material in mateials)
             {
                 material.EnableKeyword("CUSTOM_PERSPECTIVE_ON");
@@ -31,7 +31,7 @@ namespace WCGL
         {
             if (Renderer == null) return;
 
-            var mateials = materialChace.GetMaterials(Renderer, false);
+            var mateials = materialChace.GetMaterials(false);
             foreach (var material in mateials)
             {
                 material.DisableKeyword("CUSTOM_PERSPECTIVE_ON");
@@ -44,6 +44,7 @@ namespace WCGL
         void Awake()
         {
             Renderer = GetComponent<Renderer>();
+            materialChace = new MaterialCache(Renderer);
             if (customPerspectiveModel != null) customPerspectiveModel.Meshes.Add(this);
         }
 
