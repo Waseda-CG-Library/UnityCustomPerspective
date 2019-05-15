@@ -8,11 +8,10 @@ namespace WCGL
         new Camera camera;
         ScreenspaceShadowMap screenspaceShadowMap;
 
-        void Start()
+        void Awake()
         {
             camera = GetComponent<Camera>();
             screenspaceShadowMap = new ScreenspaceShadowMap(camera);
-            screenspaceShadowMap.enableCommandBuffer(camera);
         }
 
         void OnPreRender()
@@ -22,7 +21,7 @@ namespace WCGL
                 cpm.UpdateMatrix(camera);
             }
 
-            if (screenspaceShadowMap == null) Start();
+            if (screenspaceShadowMap == null) Awake();
             var shadowTexture = screenspaceShadowMap.updateBuffer(camera);
 
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())

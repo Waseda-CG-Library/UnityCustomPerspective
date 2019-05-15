@@ -123,17 +123,14 @@ namespace WCGL
             }
         }
 
-        void Start()
+        void Start(){ } //for GUI
+
+        void Awake()
         {
             var viewPosShader = Shader.Find("Hidden/CustomPerspective/ViewPos");
             ViewPosMaterial = new Material(viewPosShader);
 
             instances.Add(this);
-        }
-
-        void Reset()
-        {
-            Start();
         }
 
         void OnDestroy()

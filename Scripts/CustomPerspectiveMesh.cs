@@ -39,13 +39,9 @@ namespace WCGL
             }
         }
 
-        void Reset()
-        {
-            Renderer = GetComponent<Renderer>();
-            if (customPerspectiveModel != null) customPerspectiveModel.Meshes.Add(this);
-        }
+        void Start() { } //for GUI
 
-        void Start()
+        void Awake()
         {
             Renderer = GetComponent<Renderer>();
             if (customPerspectiveModel != null) customPerspectiveModel.Meshes.Add(this);
