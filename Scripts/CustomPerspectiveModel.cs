@@ -39,7 +39,7 @@ namespace WCGL
             if (EmphasisType == EmphasisMode.PointOfView)
             {
                 pointViewZ = viewMat.MultiplyPoint3x4(PointOfView.position).z;
-                float zLength = pointViewZ - focusView.z; //UnityではCamera座標は右手系
+                float zLength = pointViewZ - focusView.z; //Unity camera coordinates is right hand.
                 float halfHeight = -focusView.z * tanHalfFovY;
                 fovY = Mathf.Atan2(halfHeight, zLength) * 2 * Mathf.Rad2Deg;
             }
@@ -49,7 +49,7 @@ namespace WCGL
                 fovY = Mathf.Atan2(12.0f, FocalLength) * 2 * Mathf.Rad2Deg;
             }
 
-            float zn = Mathf.Max(0.01f, camera.nearClipPlane + pointViewZ); //クリップ面がマイナスにならないよう対応
+            float zn = Mathf.Max(0.01f, camera.nearClipPlane + pointViewZ); //adjust so that clip plane is not minus.
             float zf = camera.farClipPlane + pointViewZ;
 
             Matrix4x4 viewTranslate = Matrix4x4.Translate(new Vector3(0, 0, -pointViewZ));

@@ -17,13 +17,10 @@ namespace WCGL
         {
             if (Application.isPlaying == true) return renderer.materials;
 
-            //エディタモードではsharedMaterialsを使わないと何故かメモリリークする
-            //http://answers.unity3d.com/questions/283271/material-leak-in-editor.html
-
-            //描画前：sharedMaterialを別インスタンスに変更
-            //描画後：sharedMaterialを元に戻す
-            //この実装により、マテリアルのメモリリーク問題と
-            //マテリアルが別インスタンス化して内容を変更できない問題を同時に解決できる。
+            //Before render: cache sharedMaterils & change sharedMaterials to other instances
+            //After render: restore sharedMaterials
+            //Due to this implementation, solve editor mode problems memory leak and
+            //impossible to change material values because of creating other material instances 
             if (enableCustomPerspective == true)
             {
                 var sharedMaterials = renderer.sharedMaterials;
