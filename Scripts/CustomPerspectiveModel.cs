@@ -23,6 +23,7 @@ namespace WCGL
         [Space]
         public Transform Focus;
         [SerializeField] bool correctShadow = true;
+        [SerializeField] bool correctRimLight = true;
 
         public HashSet<CustomPerspectiveMesh> Meshes { get; private set; } = new HashSet<CustomPerspectiveMesh>();
         public Matrix4x4 CustomMatrix { get; private set; }
@@ -112,7 +113,8 @@ namespace WCGL
             var proj = CustomMatrix;
             foreach (var mesh in Meshes)
             {
-                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref proj, ref invVP, ref viewDirectionCorrectWorld, screenSpaceShadowMap, correctShadow);
+                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref proj, ref invVP, ref viewDirectionCorrectWorld,
+                    screenSpaceShadowMap, correctShadow, correctRimLight);
             }
         }
 
