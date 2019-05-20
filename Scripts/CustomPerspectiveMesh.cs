@@ -12,7 +12,7 @@ namespace WCGL
         public Renderer Renderer { get; private set; }
         MaterialCache materialChace;
 
-        public void enableCustomMatrix(ref Matrix4x4 customProj, ref Matrix4x4 invVP, ref Vector3 viewDirectionCorrectWorld, Texture screenSpaceShadowMap)
+        public void enableCustomMatrix(ref Matrix4x4 customProj, ref Matrix4x4 invVP, ref Vector3 viewDirectionCorrectWorld, Texture screenSpaceShadowMap, bool correctShadow)
         {
             if (Renderer == null) return;
 
@@ -22,12 +22,12 @@ namespace WCGL
                 material.EnableKeyword("CUSTOM_PERSPECTIVE_ON");
                 material.SetMatrix("CUSTOM_MATRIX_P", customProj);
                 material.SetMatrix("MATRIX_I_VP", invVP);
-                material.SetTexture("_ShadowMapTexture", screenSpaceShadowMap);
+                if (correctShadow == true) material.SetTexture("_ShadowMapTexture", screenSpaceShadowMap);
                 material.SetVector("ViewDirectionCorrectWorld", viewDirectionCorrectWorld);
             }
         }
 
-        public void disableCustomMatrix()
+        public void disableCustomMatrix(bool correctShadow)
         {
             if (Renderer == null) return;
 
@@ -35,7 +35,7 @@ namespace WCGL
             foreach (var material in mateials)
             {
                 material.DisableKeyword("CUSTOM_PERSPECTIVE_ON");
-                material.SetTexture("_ShadowMapTexture", null);
+                if (correctShadow == true) material.SetTexture("_ShadowMapTexture", null);
             }
         }
 

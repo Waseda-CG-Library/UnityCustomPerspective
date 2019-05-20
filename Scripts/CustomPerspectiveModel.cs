@@ -22,6 +22,7 @@ namespace WCGL
         public Transform VanishingPoint;
         [Space]
         public Transform Focus;
+        [SerializeField] bool correctShadow = true;
 
         public HashSet<CustomPerspectiveMesh> Meshes { get; private set; } = new HashSet<CustomPerspectiveMesh>();
         public Matrix4x4 CustomMatrix { get; private set; }
@@ -111,7 +112,7 @@ namespace WCGL
             var proj = CustomMatrix;
             foreach (var mesh in Meshes)
             {
-                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref proj, ref invVP, ref viewDirectionCorrectWorld, screenSpaceShadowMap);
+                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref proj, ref invVP, ref viewDirectionCorrectWorld, screenSpaceShadowMap, correctShadow);
             }
         }
 
@@ -119,7 +120,7 @@ namespace WCGL
         {
             foreach (var mesh in Meshes)
             {
-                if (mesh.isActiveAndEnabled) mesh.disableCustomMatrix();
+                if (mesh.isActiveAndEnabled) mesh.disableCustomMatrix(correctShadow);
             }
         }
 
