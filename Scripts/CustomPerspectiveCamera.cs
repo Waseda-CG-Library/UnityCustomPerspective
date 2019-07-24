@@ -22,16 +22,21 @@ namespace WCGL
             }
 
             if (screenspaceShadowMap == null) Awake();
-            var shadowTexture = screenspaceShadowMap.updateBuffer(camera);
+            var viewPosTexture = screenspaceShadowMap.updateBuffer(camera);
+            Shader.SetGlobalTexture("_CustomPerspective_ViewPosTexture", viewPosTexture);
+            Shader.EnableKeyword("CUSTOM_PERSPECTIVE_SHADOW_ON");
 
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
-                cpm.EnableMatrix(camera, shadowTexture);
+                cpm.EnableMatrix(camera);
             }
         }
 
         void OnPostRender()
         {
+            Shader.SetGlobalTexture("_CustomPerspective_ViewPosTexture", null);
+            Shader.DisableKeyword("CUSTOM_PERSPECTIVE_SHADOW_ON");
+
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
                 cpm.DisableMatrix();

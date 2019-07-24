@@ -22,12 +22,11 @@ namespace WCGL
         public Transform VanishingPoint;
         [Space]
         public Transform Focus;
-        [SerializeField] bool correctShadow = true;
+        public bool correctShadow = true;
         [SerializeField] bool correctRimLight = true;
 
         public HashSet<CustomPerspectiveMesh> Meshes { get; private set; } = new HashSet<CustomPerspectiveMesh>();
         public Matrix4x4 CustomMatrix { get; private set; }
-        public Material ViewPosMaterial { get; private set; }
         Vector3 viewDirectionCorrectWorld;
 
         (Matrix4x4, float) createEmphasisMatrix(Camera camera)
@@ -103,7 +102,7 @@ namespace WCGL
             viewDirectionCorrectWorld = camera.cameraToWorldMatrix.MultiplyVector(viewXYZW);
         }
 
-        public void EnableMatrix(Camera camera, Texture screenSpaceShadowMap)
+        public void EnableMatrix(Camera camera)
         {
             float version = float.Parse(Application.unityVersion.Substring(0, 3));
             bool renderIntoTexture = version >= 5.6f;
@@ -113,8 +112,8 @@ namespace WCGL
             var proj = CustomMatrix;
             foreach (var mesh in Meshes)
             {
-                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref proj, ref invVP, ref viewDirectionCorrectWorld,
-                    screenSpaceShadowMap, correctShadow, correctRimLight);
+                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref proj, ref invVP,
+                    ref viewDirectionCorrectWorld, correctRimLight);
             }
         }
 
@@ -130,9 +129,6 @@ namespace WCGL
 
         void Awake()
         {
-            var viewPosShader = Shader.Find("Hidden/CustomPerspective/ViewPos");
-            ViewPosMaterial = new Material(viewPosShader);
-
             instances.Add(this);
         }
 

@@ -7,6 +7,8 @@
     {
         Tags { "RenderType"="Opaque" }
         LOD 100
+        Cull Off
+        ZWrite Off ZTest Equal
 
         Pass
         {
@@ -17,7 +19,6 @@
             #include "UnityCG.cginc"
 
             #define CUSTOM_PERSPECTIVE_ON
-            #pragma multi_compile _ CUSTOM_PERSPECTIVE_ON
             #include "CustomPerspective.cginc"
 
             struct appdata
