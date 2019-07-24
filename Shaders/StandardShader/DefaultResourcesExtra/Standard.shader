@@ -88,9 +88,11 @@ Shader "CustomPerspective/Standard"
             // Uncomment the following line to enable dithering LOD crossfade. Note: there are more in the file to uncomment for other passes.
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
+            #pragma multi_compile _ CUSTOM_PERSPECTIVE_ON
+
             #pragma vertex vertBase
             #pragma fragment fragBase
-            #include "UnityStandardCoreForward.cginc"
+            #include "../CGIncludes/UnityStandardCoreForward.cginc"
 
             ENDCG
         }
@@ -124,9 +126,11 @@ Shader "CustomPerspective/Standard"
             // Uncomment the following line to enable dithering LOD crossfade. Note: there are more in the file to uncomment for other passes.
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
+            #pragma multi_compile _ CUSTOM_PERSPECTIVE_ON
+
             #pragma vertex vertAdd
             #pragma fragment fragAdd
-            #include "UnityStandardCoreForward.cginc"
+            #include "../CGIncludes/UnityStandardCoreForward.cginc"
 
             ENDCG
         }
@@ -153,10 +157,12 @@ Shader "CustomPerspective/Standard"
             // Uncomment the following line to enable dithering LOD crossfade. Note: there are more in the file to uncomment for other passes.
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
+            #pragma multi_compile _ CUSTOM_PERSPECTIVE_ON
+
             #pragma vertex vertShadowCaster
             #pragma fragment fragShadowCaster
 
-            #include "UnityStandardShadow.cginc"
+            #include "../CGIncludes/UnityStandardShadow.cginc"
 
             ENDCG
         }
@@ -188,10 +194,12 @@ Shader "CustomPerspective/Standard"
             // Uncomment the following line to enable dithering LOD crossfade. Note: there are more in the file to uncomment for other passes.
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
+            #pragma multi_compile _ CUSTOM_PERSPECTIVE_ON
+
             #pragma vertex vertDeferred
             #pragma fragment fragDeferred
 
-            #include "UnityStandardCore.cginc"
+            #include "../CGIncludes/UnityStandardCore.cginc"
 
             ENDCG
         }
@@ -216,7 +224,7 @@ Shader "CustomPerspective/Standard"
             #pragma shader_feature ___ _DETAIL_MULX2
             #pragma shader_feature EDITOR_VISUALIZATION
 
-            #include "UnityStandardMeta.cginc"
+            #include "../CGIncludes/UnityStandardMeta.cginc"
             ENDCG
         }
     }
@@ -256,7 +264,7 @@ Shader "CustomPerspective/Standard"
 
             #pragma vertex vertBase
             #pragma fragment fragBase
-            #include "UnityStandardCoreForward.cginc"
+            #include "../CGIncludes/UnityStandardCoreForward.cginc"
 
             ENDCG
         }
@@ -288,7 +296,7 @@ Shader "CustomPerspective/Standard"
 
             #pragma vertex vertAdd
             #pragma fragment fragAdd
-            #include "UnityStandardCoreForward.cginc"
+            #include "../CGIncludes/UnityStandardCoreForward.cginc"
 
             ENDCG
         }
@@ -312,7 +320,7 @@ Shader "CustomPerspective/Standard"
             #pragma vertex vertShadowCaster
             #pragma fragment fragShadowCaster
 
-            #include "UnityStandardShadow.cginc"
+            #include "../CGIncludes/UnityStandardShadow.cginc"
 
             ENDCG
         }
@@ -337,7 +345,7 @@ Shader "CustomPerspective/Standard"
             #pragma shader_feature ___ _DETAIL_MULX2
             #pragma shader_feature EDITOR_VISUALIZATION
 
-            #include "UnityStandardMeta.cginc"
+            #include "../CGIncludes/UnityStandardMeta.cginc"
             ENDCG
         }
     }

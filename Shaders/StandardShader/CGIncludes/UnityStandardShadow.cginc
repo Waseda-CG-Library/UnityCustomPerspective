@@ -11,6 +11,7 @@
 #include "UnityShaderVariables.cginc"
 #include "UnityStandardConfig.cginc"
 #include "UnityStandardUtils.cginc"
+#include "../../CustomPerspective.cginc"
 
 #if (defined(_ALPHABLEND_ON) || defined(_ALPHAPREMULTIPLY_ON)) && defined(UNITY_USE_DITHER_MASK_FOR_ALPHABLENDED_SHADOWS)
     #define UNITY_STANDARD_USE_DITHER_MASK 1
@@ -145,6 +146,13 @@ void vertShadowCaster (VertexInput v
             TANGENT_SPACE_ROTATION;
             o.viewDirForParallax = mul (rotation, ObjSpaceViewDir(v.vertex));
         #endif
+    #endif
+
+    #ifdef CUSTOM_PERSPECTIVE_ON
+        if (!any(unity_LightShadowBias)) //DepthTexture
+        {
+            opos = ObjectToCustomClipPos(v.vertex);
+        }
     #endif
 }
 

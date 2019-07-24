@@ -269,7 +269,7 @@ VertexOutputForwardAddSimple vertForwardAddSimple (VertexInput v)
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
     float4 posWorld = mul(unity_ObjectToWorld, v.vertex);
-    o.pos = UnityObjectToClipPos(v.vertex);
+    o.pos = ObjectToCustomClipPos(v.vertex);
     o.tex = TexCoords(v);
     o.posWorld = posWorld.xyz;
 

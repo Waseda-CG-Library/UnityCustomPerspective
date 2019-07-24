@@ -11,6 +11,7 @@
 #include "UnityStandardUtils.cginc"
 #include "UnityGBuffer.cginc"
 #include "UnityStandardBRDF.cginc"
+#include "../../CustomPerspective.cginc"
 
 #include "AutoLight.cginc"
 //-------------------------------------------------------------------------------------
@@ -390,7 +391,7 @@ VertexOutputForwardBase vertForwardBase (VertexInput v)
             o.posWorld = posWorld.xyz;
         #endif
     #endif
-    o.pos = UnityObjectToClipPos(v.vertex);
+    o.pos = ObjectToCustomClipPos(v.vertex);
 
     o.tex = TexCoords(v);
     o.eyeVec.xyz = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);
@@ -481,7 +482,7 @@ VertexOutputForwardAdd vertForwardAdd (VertexInput v)
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
     float4 posWorld = mul(unity_ObjectToWorld, v.vertex);
-    o.pos = UnityObjectToClipPos(v.vertex);
+    o.pos = ObjectToCustomClipPos(v.vertex);
 
     o.tex = TexCoords(v);
     o.eyeVec.xyz = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);
