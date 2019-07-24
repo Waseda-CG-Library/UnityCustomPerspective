@@ -399,6 +399,8 @@ Subshader {
         #pragma multi_compile_shadowcollector
         #pragma target 3.0
 
+        #pragma multi_compile _ CUSTOM_PERSPECTIVE_SHADOW_ON
+
         inline float3 computeCameraSpacePosFromDepth(v2f i)
         {
             return computeCameraSpacePosFromDepthAndVSInfo(i);
@@ -422,6 +424,8 @@ Subshader{
         #pragma fragment frag_pcfSoft
         #pragma multi_compile_shadowcollector
         #pragma target 3.0
+
+        #pragma multi_compile _ CUSTOM_PERSPECTIVE_SHADOW_ON
 
         inline float3 computeCameraSpacePosFromDepth(v2f i)
         {
