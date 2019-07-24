@@ -6,13 +6,13 @@ namespace WCGL
 {
     class ScreenspaceShadowMap
     {
-        CommandBuffer commad;
+        CommandBuffer command;
         RenderTexture viewPosTexture;
 
         public ScreenspaceShadowMap(Camera camera)
         {
-            commad = new CommandBuffer();
-            commad.name = "CustomPerspective Meshes ViewPos";
+            command = new CommandBuffer();
+            command.name = "CustomPerspective Meshes ViewPos";
 
             resetTexture(camera);
         }
@@ -26,12 +26,12 @@ namespace WCGL
 
         public Texture updateBuffer(Camera camera)
         {
-            commad.Clear();
+            command.Clear();
 
             if (viewPosTexture.width != camera.pixelWidth || viewPosTexture.height != camera.pixelHeight) resetTexture(camera);
 
-            commad.SetRenderTarget(viewPosTexture, BuiltinRenderTextureType.Depth);
-            commad.ClearRenderTarget(false, true, Color.clear);
+            command.SetRenderTarget(viewPosTexture, BuiltinRenderTextureType.Depth);
+            command.ClearRenderTarget(false, true, Color.clear);
 
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
@@ -46,7 +46,7 @@ namespace WCGL
                     int count = mesh.Renderer.sharedMaterials.Count();
                     for (int i = 0; i < count; i++)
                     {
-                        commad.DrawRenderer(mesh.Renderer, viewPosMaterial, i);
+                        command.DrawRenderer(mesh.Renderer, viewPosMaterial, i);
                     }
                 }
             }
@@ -56,12 +56,12 @@ namespace WCGL
 
         public void enableCommandBuffer(Camera camera)
         {
-            camera.AddCommandBuffer(CameraEvent.AfterDepthTexture, commad);
+            camera.AddCommandBuffer(CameraEvent.AfterDepthTexture, command);
         }
 
         public void disableCommandBuffer(Camera camera)
         {
-            camera.RemoveCommandBuffer(CameraEvent.AfterDepthTexture, commad);
+            camera.RemoveCommandBuffer(CameraEvent.AfterDepthTexture, command);
         }
     }
 }
