@@ -19,8 +19,9 @@ namespace WCGL
 
         void resetTexture(Camera camera)
         {
-            viewPosTexture = new RenderTexture(camera.pixelWidth, camera.scaledPixelHeight, 16, RenderTextureFormat.ARGBHalf);
+            viewPosTexture = new RenderTexture(camera.pixelWidth, camera.scaledPixelHeight, 0, RenderTextureFormat.ARGBHalf);
             viewPosTexture.name = "CustomPerspective_ViewPos";
+            viewPosTexture.filterMode = FilterMode.Point;
         }
 
         public Texture updateBuffer(Camera camera)
@@ -29,8 +30,8 @@ namespace WCGL
 
             if (viewPosTexture.width != camera.pixelWidth || viewPosTexture.height != camera.pixelHeight) resetTexture(camera);
 
-            commad.SetRenderTarget(viewPosTexture);
-            commad.ClearRenderTarget(true, true, Color.clear);
+            commad.SetRenderTarget(viewPosTexture, BuiltinRenderTextureType.Depth);
+            commad.ClearRenderTarget(false, true, Color.clear);
 
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
