@@ -14,7 +14,7 @@ float4 _ShadowMapTexture_TexelSize;
 #define SHADOWMAPSAMPLER_AND_TEXELSIZE_DEFINED
 sampler2D _ODSWorldTexture;
 
-sampler2D ViewPosTexture;
+sampler2D _CustomPerspective_ViewPosTexture;
 
 #include "UnityCG.cginc"
 #include "UnityShadowLibrary.cginc"
@@ -181,6 +181,52 @@ inline float4 getShadowCoord_SingleCascade( float4 wpos )
 }
 
 /**
+* Get camera space coord from depth and inv projection matrices
+*/
+inline float3 computeCameraSpacePosFromDepthAndInvProjMat(v2f i)
+{
+    float zdepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv.xy);
+
+    #if defined(UNITY_REVERSED_Z)
+        zdepth = 1 - zdepth;
+    #endif
+
+    // View position calculation for oblique clipped projection case.
+    // this will not be as precise nor as fast as the other method
+    // (which computes it from interpolated ray & depth) but will work
+    // with funky projections.
+    float4 clipPos = float4(i.uv.zw, zdepth, 1.0);
+    clipPos.xyz = 2.0f * clipPos.xyz - 1.0f;
+    float4 camPos = mul(unity_CameraInvProjection, clipPos);
+    camPos.xyz /= camPos.w;
+    camPos.z *= -1;
+    return camPos.xyz;
+}
+
+/**
+* Get camera space coord from depth and info from VS
+*/
+inline float3 computeCameraSpacePosFromDepthAndVSInfo(v2f i)
+{
+    float zdepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv.xy);
+
+    // 0..1 linear depth, 0 at camera, 1 at far plane.
+    float depth = lerp(Linear01Depth(zdepth), zdepth, unity_OrthoParams.w);
+#if defined(UNITY_REVERSED_Z)
+    zdepth = 1 - zdepth;
+#endif
+
+    // view position calculation for perspective & ortho cases
+    float3 vposPersp = i.ray * depth;
+    float3 vposOrtho = lerp(i.orthoPosNear, i.orthoPosFar, zdepth);
+    // pick the perspective or ortho position as needed
+    float3 camPos = lerp(vposPersp, vposOrtho, unity_OrthoParams.w);
+    return camPos.xyz;
+}
+
+inline float3 computeCameraSpacePosFromDepth(v2f i);
+
+/**
  *  Hard shadow
  */
 fixed4 frag_hard (v2f i) : SV_Target
@@ -194,8 +240,11 @@ fixed4 frag_hard (v2f i) : SV_Target
     wpos.w = 1.0f;
     vpos = mul(unity_WorldToCamera, wpos).xyz;
 #else
-    vpos = tex2D(ViewPosTexture,i.uv.xy).xyz;
-    if (vpos.z == 0) return float4(0, 0, 0, 0);
+    vpos = computeCameraSpacePosFromDepth(i);
+    #ifdef CUSTOM_PERSPECTIVE_SHADOW_ON
+    float4 cpVpos = tex2D(_CustomPerspective_ViewPosTexture, i.uv.xy);
+    vpos = lerp(vpos, cpVpos.xyz, cpVpos.w);
+    #endif
     wpos = mul (unity_CameraToWorld, float4(vpos,1));
 #endif
     fixed4 cascadeWeights = GET_CASCADE_WEIGHTS (wpos, vpos.z);
@@ -223,8 +272,12 @@ fixed4 frag_pcfSoft(v2f i) : SV_Target
     wpos.w = 1.0f;
     vpos = mul(unity_WorldToCamera, wpos).xyz;
 #else
-    vpos = tex2D(ViewPosTexture, i.uv.xy).xyz;
-    if (vpos.z == 0) return float4(0, 0, 0, 0);
+    vpos = computeCameraSpacePosFromDepth(i);
+    #ifdef CUSTOM_PERSPECTIVE_SHADOW_ON
+    float4 cpVpos = tex2D(_CustomPerspective_ViewPosTexture, i.uv.xy);
+    vpos = lerp(vpos, cpVpos.xyz, cpVpos.w);
+    #endif
+
     // sample the cascade the pixel belongs to
     wpos = mul(unity_CameraToWorld, float4(vpos,1));
 #endif
@@ -282,27 +335,62 @@ fixed4 frag_pcfSoft(v2f i) : SV_Target
 ENDCG
 
 
+// ----------------------------------------------------------------------------------------
+// Subshader for hard shadows:
+// Just collect shadows into the buffer. Used on pre-SM3 GPUs and when hard shadows are picked.
 
 SubShader {
-    // ----------------------------------------------------------------------------------------
-    // Subshader for hard shadows:
-    // Just collect shadows into the buffer. Used on pre-SM3 GPUs and when hard shadows are picked.
+    Tags{ "ShadowmapFilter" = "HardShadow" }
     Pass {
-        Tags{ "ShadowmapFilter" = "HardShadow" }
         ZWrite Off ZTest Always Cull Off
 
         CGPROGRAM
         #pragma vertex vert
         #pragma fragment frag_hard
         #pragma multi_compile_shadowcollector
+
+        #pragma multi_compile _ CUSTOM_PERSPECTIVE_SHADOW_ON
+
+        inline float3 computeCameraSpacePosFromDepth(v2f i)
+        {
+            return computeCameraSpacePosFromDepthAndVSInfo(i);
+        }
         ENDCG
     }
+}
 
-    // ----------------------------------------------------------------------------------------
-    // Subshader that does soft PCF filtering while collecting shadows.
-    // Requires SM3 GPU.
+// ----------------------------------------------------------------------------------------
+// Subshader for hard shadows:
+// Just collect shadows into the buffer. Used on pre-SM3 GPUs and when hard shadows are picked.
+// This version does inv projection at the PS level, slower and less precise however more general.
+
+SubShader {
+    Tags{ "ShadowmapFilter" = "HardShadow_FORCE_INV_PROJECTION_IN_PS" }
+    Pass{
+        ZWrite Off ZTest Always Cull Off
+
+        CGPROGRAM
+        #pragma vertex vert
+        #pragma fragment frag_hard
+        #pragma multi_compile_shadowcollector
+
+        #pragma multi_compile _ CUSTOM_PERSPECTIVE_SHADOW_ON
+
+        inline float3 computeCameraSpacePosFromDepth(v2f i)
+        {
+            return computeCameraSpacePosFromDepthAndInvProjMat(i);
+        }
+        ENDCG
+    }
+}
+
+// ----------------------------------------------------------------------------------------
+// Subshader that does soft PCF filtering while collecting shadows.
+// Requires SM3 GPU.
+
+Subshader {
+    Tags {"ShadowmapFilter" = "PCF_SOFT"}
     Pass {
-        Tags {"ShadowmapFilter" = "PCF_SOFT"}
         ZWrite Off ZTest Always Cull Off
 
         CGPROGRAM
@@ -310,10 +398,38 @@ SubShader {
         #pragma fragment frag_pcfSoft
         #pragma multi_compile_shadowcollector
         #pragma target 3.0
+
+        inline float3 computeCameraSpacePosFromDepth(v2f i)
+        {
+            return computeCameraSpacePosFromDepthAndVSInfo(i);
+        }
         ENDCG
     }
 }
 
+// ----------------------------------------------------------------------------------------
+// Subshader that does soft PCF filtering while collecting shadows.
+// Requires SM3 GPU.
+// This version does inv projection at the PS level, slower and less precise however more general.
+
+Subshader{
+    Tags{ "ShadowmapFilter" = "PCF_SOFT_FORCE_INV_PROJECTION_IN_PS" }
+    Pass{
+        ZWrite Off ZTest Always Cull Off
+
+        CGPROGRAM
+        #pragma vertex vert
+        #pragma fragment frag_pcfSoft
+        #pragma multi_compile_shadowcollector
+        #pragma target 3.0
+
+        inline float3 computeCameraSpacePosFromDepth(v2f i)
+        {
+            return computeCameraSpacePosFromDepthAndInvProjMat(i);
+        }
+        ENDCG
+    }
+}
 
 Fallback Off
 }
