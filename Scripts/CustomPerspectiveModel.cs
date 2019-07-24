@@ -27,7 +27,6 @@ namespace WCGL
 
         public HashSet<CustomPerspectiveMesh> Meshes { get; private set; } = new HashSet<CustomPerspectiveMesh>();
         public Matrix4x4 CustomMatrix { get; private set; }
-        public Material ViewPosMaterial { get; private set; }
         Vector3 viewDirectionCorrectWorld;
 
         (Matrix4x4, float) createEmphasisMatrix(Camera camera)
@@ -130,9 +129,6 @@ namespace WCGL
 
         void Awake()
         {
-            var viewPosShader = Shader.Find("Hidden/CustomPerspective/ViewPos");
-            ViewPosMaterial = new Material(viewPosShader);
-
             instances.Add(this);
         }
 

@@ -6,11 +6,19 @@ namespace WCGL
 {
     class ScreenspaceShadowMap
     {
+        static Material ViewPosMaterial;
+
         CommandBuffer command;
         RenderTexture viewPosTexture;
 
         public ScreenspaceShadowMap(Camera camera)
         {
+            if (ViewPosMaterial == null)
+            {
+                var viewPosShader = Shader.Find("Hidden/CustomPerspective/ViewPos");
+                ViewPosMaterial = new Material(viewPosShader);
+            }
+
             command = new CommandBuffer();
             command.name = "CustomPerspective Meshes ViewPos";
 
@@ -37,8 +45,7 @@ namespace WCGL
             {
                 if (cpm.correctShadow == false) continue;
 
-                var viewPosMaterial = cpm.ViewPosMaterial;
-                viewPosMaterial.SetMatrix("CUSTOM_MATRIX_P", cpm.CustomMatrix);
+                command.SetGlobalMatrix("CUSTOM_MATRIX_P", cpm.CustomMatrix);
                 foreach (var mesh in cpm.Meshes)
                 {
                     if (mesh.isActiveAndEnabled == false) continue;
@@ -46,7 +53,7 @@ namespace WCGL
                     int count = mesh.Renderer.sharedMaterials.Count();
                     for (int i = 0; i < count; i++)
                     {
-                        command.DrawRenderer(mesh.Renderer, viewPosMaterial, i);
+                        command.DrawRenderer(mesh.Renderer, ViewPosMaterial, i);
                     }
                 }
             }
