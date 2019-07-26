@@ -8,6 +8,8 @@ namespace WCGL
         new Camera camera;
         ScreenspaceShadowMap screenspaceShadowMap;
 
+        public ScreenspaceShadowMap.RenderPath projectSettingPath = ScreenspaceShadowMap.RenderPath.Forward;
+
         void Awake()
         {
             camera = GetComponent<Camera>();
@@ -22,7 +24,7 @@ namespace WCGL
             }
 
             if (screenspaceShadowMap == null) Awake();
-            var viewPosTexture = screenspaceShadowMap.updateBuffer(camera);
+            var viewPosTexture = screenspaceShadowMap.updateBuffer(camera, projectSettingPath);
             Shader.SetGlobalTexture("_CustomPerspective_ViewPosTexture", viewPosTexture);
             Shader.EnableKeyword("CUSTOM_PERSPECTIVE_SHADOW_ON");
 
