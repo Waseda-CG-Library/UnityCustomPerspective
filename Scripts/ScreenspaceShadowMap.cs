@@ -4,8 +4,10 @@ using System.Linq;
 
 namespace WCGL
 {
-    class ScreenspaceShadowMap
+    public class ScreenspaceShadowMap
     {
+        public enum RenderPath { Forward, Deferred };
+
         static Material ViewPosMaterial;
 
         CommandBuffer command;
@@ -32,13 +34,19 @@ namespace WCGL
             viewPosTexture.filterMode = FilterMode.Point;
         }
 
-        public Texture updateBuffer(Camera camera)
+        public Texture updateBuffer(Camera camera, RenderPath renderPath)
         {
             command.Clear();
 
             if (viewPosTexture.width != camera.pixelWidth || viewPosTexture.height != camera.pixelHeight) resetTexture(camera);
 
-            command.SetRenderTarget(viewPosTexture, BuiltinRenderTextureType.Depth);
+            var path = camera.renderingPath;
+            if (path == RenderingPath.Forward) renderPath = RenderPath.Forward;
+            else if (path == RenderingPath.DeferredShading) renderPath = RenderPath.Deferred;
+            var depth = renderPath == RenderPath.Forward ?
+                BuiltinRenderTextureType.Depth : BuiltinRenderTextureType.ResolvedDepth;
+
+            command.SetRenderTarget(viewPosTexture, depth);
             command.ClearRenderTarget(false, true, Color.clear);
 
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
@@ -64,11 +72,13 @@ namespace WCGL
         public void enableCommandBuffer(Camera camera)
         {
             camera.AddCommandBuffer(CameraEvent.AfterDepthTexture, command);
+            camera.AddCommandBuffer(CameraEvent.BeforeLighting, command);
         }
 
         public void disableCommandBuffer(Camera camera)
         {
             camera.RemoveCommandBuffer(CameraEvent.AfterDepthTexture, command);
+            camera.RemoveCommandBuffer(CameraEvent.BeforeLighting, command);
         }
     }
 }

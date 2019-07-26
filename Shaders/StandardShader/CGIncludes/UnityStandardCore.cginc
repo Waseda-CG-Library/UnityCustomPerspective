@@ -582,7 +582,7 @@ VertexOutputDeferred vertDeferred (VertexInput v)
             o.posWorld = posWorld.xyz;
         #endif
     #endif
-    o.pos = UnityObjectToClipPos(v.vertex);
+    o.pos = ObjectToCustomClipPos(v.vertex);
 
     o.tex = TexCoords(v);
     o.eyeVec = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);

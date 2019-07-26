@@ -1,6 +1,6 @@
 // Unity built-in shader source. Copyright (c) 2016 Unity Technologies. MIT license (see license.txt)
 
-Shader "Hidden/Internal-DeferredShading" {
+Shader "Hidden/CustomPerspective/Internal-DeferredShading" {
 Properties {
     _LightTexture0 ("", any) = "" {}
     _LightTextureB0 ("", 2D) = "" {}
@@ -37,6 +37,8 @@ sampler2D _CameraGBufferTexture0;
 sampler2D _CameraGBufferTexture1;
 sampler2D _CameraGBufferTexture2;
 
+sampler2D _CustomPerspective_ViewPosTexture;
+
 half4 CalculateLight (unity_v2f_deferred i)
 {
     float3 wpos;
@@ -53,6 +55,10 @@ half4 CalculateLight (unity_v2f_deferred i)
     half4 gbuffer1 = tex2D (_CameraGBufferTexture1, uv);
     half4 gbuffer2 = tex2D (_CameraGBufferTexture2, uv);
     UnityStandardData data = UnityStandardDataFromGbuffer(gbuffer0, gbuffer1, gbuffer2);
+
+    float4 vpos = tex2D(_CustomPerspective_ViewPosTexture, uv);
+    float4 _wpos = mul(unity_CameraToWorld, vpos);
+    wpos = lerp(wpos, _wpos, vpos.w);
 
     float3 eyeVec = normalize(wpos-_WorldSpaceCameraPos);
     half oneMinusReflectivity = 1 - SpecularStrength(data.specularColor.rgb);
