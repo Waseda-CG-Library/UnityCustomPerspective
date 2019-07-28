@@ -153,7 +153,8 @@ void vertShadowCaster (VertexInput v
     #if defined(CUSTOM_PERSPECTIVE_ON) && defined(CUSTOM_PERSPECTIVE_DEPTH_PATH)
         opos = ObjectToCustomClipPos(v.vertex);
     #elif defined(CUSTOM_PERSPECTIVE_SHADOW_PATH)
-        opos.xy *= _CustomPerspective_ShadowMapScale;
+        float2 xy = opos.xy * _CustomPerspective_ShadowMapScale;
+        opos.xy = lerp(xy, opos.xy, _WorldSpaceLightPos0.w);
     #endif
 }
 

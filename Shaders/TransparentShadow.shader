@@ -71,7 +71,8 @@ Shader "Hidden/CustomPerspective/Transparent/Cutout/Diffuse" {
 				#if defined(CUSTOM_PERSPECTIVE_ON) && defined(CUSTOM_PERSPECTIVE_DEPTH_PATH)
 					o.pos = ObjectToCustomClipPos(v.vertex);
 				#elif defined(CUSTOM_PERSPECTIVE_SHADOW_PATH)
-					o.pos.xy *= _CustomPerspective_ShadowMapScale;
+					float2 xy = o.pos.xy * _CustomPerspective_ShadowMapScale;
+					o.pos.xy = lerp(xy, o.pos.xy, _WorldSpaceLightPos0.w);
 				#endif
 
 				return o;
