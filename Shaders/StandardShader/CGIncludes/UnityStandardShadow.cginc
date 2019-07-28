@@ -55,6 +55,8 @@ sampler2D   _ParallaxMap;
 half        _Parallax;
 #endif
 
+float _CustomPerspective_ShadowMapScale;
+
 half MetallicSetup_ShadowGetOneMinusReflectivity(half2 uv)
 {
     half metallicity = _Metallic;
@@ -150,6 +152,8 @@ void vertShadowCaster (VertexInput v
 
     #if defined(CUSTOM_PERSPECTIVE_ON) && defined(CUSTOM_PERSPECTIVE_DEPTH_PATH)
         opos = ObjectToCustomClipPos(v.vertex);
+    #elif defined(CUSTOM_PERSPECTIVE_SHADOW_PATH)
+        opos.xy *= _CustomPerspective_ShadowMapScale;
     #endif
 }
 

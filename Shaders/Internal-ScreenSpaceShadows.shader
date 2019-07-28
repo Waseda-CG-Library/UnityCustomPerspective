@@ -15,6 +15,7 @@ float4 _ShadowMapTexture_TexelSize;
 sampler2D _ODSWorldTexture;
 
 sampler2D _CustomPerspective_ViewPosTexture;
+float _CustomPerspective_ShadowMapScale;
 
 #include "UnityCG.cginc"
 #include "UnityShadowLibrary.cginc"
@@ -169,6 +170,15 @@ inline float4 getShadowCoord( float4 wpos, fixed4 cascadeWeights )
     float  noCascadeWeights = 1 - dot(cascadeWeights, float4(1, 1, 1, 1));
     shadowMapCoordinate.z += noCascadeWeights;
 #endif
+
+#if defined(CUSTOM_PERSPECTIVE_SHADOW_PATH)
+    float2 center = float2(0.25f, 0.25f) * cascadeWeights[0] + float2(0.75f, 0.25f) * cascadeWeights[1]
+                  + float2(0.25f, 0.75f) * cascadeWeights[2] + float2(0.75f, 0.75f) * cascadeWeights[3];
+    shadowMapCoordinate.xy -= center;
+    shadowMapCoordinate.xy *= _CustomPerspective_ShadowMapScale;
+    shadowMapCoordinate.xy += center;
+#endif
+
     return shadowMapCoordinate;
 }
 
@@ -241,7 +251,7 @@ fixed4 frag_hard (v2f i) : SV_Target
     vpos = mul(unity_WorldToCamera, wpos).xyz;
 #else
     vpos = computeCameraSpacePosFromDepth(i);
-    #ifdef CUSTOM_PERSPECTIVE_SHADOW_ON
+    #ifdef CUSTOM_PERSPECTIVE_SHADOW_PATH
     float4 cpVpos = tex2D(_CustomPerspective_ViewPosTexture, i.uv.xy);
     vpos = lerp(vpos, cpVpos.xyz, cpVpos.w);
     #endif
@@ -273,7 +283,7 @@ fixed4 frag_pcfSoft(v2f i) : SV_Target
     vpos = mul(unity_WorldToCamera, wpos).xyz;
 #else
     vpos = computeCameraSpacePosFromDepth(i);
-    #ifdef CUSTOM_PERSPECTIVE_SHADOW_ON
+    #ifdef CUSTOM_PERSPECTIVE_SHADOW_PATH
     float4 cpVpos = tex2D(_CustomPerspective_ViewPosTexture, i.uv.xy);
     vpos = lerp(vpos, cpVpos.xyz, cpVpos.w);
     #endif
@@ -349,7 +359,7 @@ SubShader {
         #pragma fragment frag_hard
         #pragma multi_compile_shadowcollector
 
-        #pragma multi_compile _ CUSTOM_PERSPECTIVE_SHADOW_ON
+        #pragma multi_compile _ CUSTOM_PERSPECTIVE_SHADOW_PATH
 
         inline float3 computeCameraSpacePosFromDepth(v2f i)
         {
@@ -374,7 +384,7 @@ SubShader {
         #pragma fragment frag_hard
         #pragma multi_compile_shadowcollector
 
-        #pragma multi_compile _ CUSTOM_PERSPECTIVE_SHADOW_ON
+        #pragma multi_compile _ CUSTOM_PERSPECTIVE_SHADOW_PATH
 
         inline float3 computeCameraSpacePosFromDepth(v2f i)
         {
@@ -399,7 +409,7 @@ Subshader {
         #pragma multi_compile_shadowcollector
         #pragma target 3.0
 
-        #pragma multi_compile _ CUSTOM_PERSPECTIVE_SHADOW_ON
+        #pragma multi_compile _ CUSTOM_PERSPECTIVE_SHADOW_PATH
 
         inline float3 computeCameraSpacePosFromDepth(v2f i)
         {
@@ -425,7 +435,7 @@ Subshader{
         #pragma multi_compile_shadowcollector
         #pragma target 3.0
 
-        #pragma multi_compile _ CUSTOM_PERSPECTIVE_SHADOW_ON
+        #pragma multi_compile _ CUSTOM_PERSPECTIVE_SHADOW_PATH
 
         inline float3 computeCameraSpacePosFromDepth(v2f i)
         {

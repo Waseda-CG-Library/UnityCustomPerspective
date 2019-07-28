@@ -8,6 +8,7 @@ namespace WCGL
         new Camera camera;
         ScreenspaceShadowMap screenspaceShadowMap;
 
+        [Range(1.0f, 2.0f)] public float shadowMapField = 1.0f;
         public ScreenspaceShadowMap.RenderPath projectSettingPath = ScreenspaceShadowMap.RenderPath.Forward;
 
         void Awake()
@@ -28,7 +29,8 @@ namespace WCGL
             var command = screenspaceShadowMap.updateBuffer(camera, projectSettingPath);
             command.DisableShaderKeyword("CUSTOM_PERSPECTIVE_DEPTH_PATH");
             Shader.SetGlobalTexture("_CustomPerspective_ViewPosTexture", screenspaceShadowMap.ViewPosTexture);
-            Shader.EnableKeyword("CUSTOM_PERSPECTIVE_SHADOW_ON");
+            Shader.SetGlobalFloat("_CustomPerspective_ShadowMapScale", 1.0f / shadowMapField);
+            Shader.EnableKeyword("CUSTOM_PERSPECTIVE_SHADOW_PATH");
 
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
@@ -39,7 +41,7 @@ namespace WCGL
         void OnPostRender()
         {
             Shader.SetGlobalTexture("_CustomPerspective_ViewPosTexture", null);
-            Shader.DisableKeyword("CUSTOM_PERSPECTIVE_SHADOW_ON");
+            Shader.DisableKeyword("CUSTOM_PERSPECTIVE_SHADOW_PATH");
 
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {

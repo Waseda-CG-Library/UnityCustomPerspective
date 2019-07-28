@@ -158,7 +158,7 @@ Shader "CustomPerspective/Standard"
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
             #pragma multi_compile _ CUSTOM_PERSPECTIVE_ON
-            #pragma multi_compile _ CUSTOM_PERSPECTIVE_DEPTH_PATH
+            #pragma multi_compile _ CUSTOM_PERSPECTIVE_DEPTH_PATH CUSTOM_PERSPECTIVE_SHADOW_PATH
 
             #pragma vertex vertShadowCaster
             #pragma fragment fragShadowCaster

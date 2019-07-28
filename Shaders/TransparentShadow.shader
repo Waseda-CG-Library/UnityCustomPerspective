@@ -47,7 +47,7 @@ Shader "Hidden/CustomPerspective/Transparent/Cutout/Diffuse" {
 			#include "UnityCG.cginc"
 
 			#pragma multi_compile _ CUSTOM_PERSPECTIVE_ON
-			#pragma multi_compile _ CUSTOM_PERSPECTIVE_DEPTH_PATH
+			#pragma multi_compile _ CUSTOM_PERSPECTIVE_DEPTH_PATH CUSTOM_PERSPECTIVE_SHADOW_PATH
 			#include "CustomPerspective.cginc"
 
 			struct v2f {
@@ -57,6 +57,8 @@ Shader "Hidden/CustomPerspective/Transparent/Cutout/Diffuse" {
 			};
 
 			uniform float4 _MainTex_ST;
+
+			float _CustomPerspective_ShadowMapScale;
 
 			v2f vert(appdata_base v)
 			{
@@ -68,6 +70,8 @@ Shader "Hidden/CustomPerspective/Transparent/Cutout/Diffuse" {
 
 				#if defined(CUSTOM_PERSPECTIVE_ON) && defined(CUSTOM_PERSPECTIVE_DEPTH_PATH)
 					o.pos = ObjectToCustomClipPos(v.vertex);
+				#elif defined(CUSTOM_PERSPECTIVE_SHADOW_PATH)
+					o.pos.xy *= _CustomPerspective_ShadowMapScale;
 				#endif
 
 				return o;
