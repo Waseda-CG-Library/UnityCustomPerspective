@@ -11,7 +11,7 @@ namespace WCGL
         static Material ViewPosMaterial;
 
         CommandBuffer command;
-        RenderTexture viewPosTexture;
+        public RenderTexture ViewPosTexture { get; private set; }
 
         public ScreenspaceShadowMap(Camera camera)
         {
@@ -29,16 +29,16 @@ namespace WCGL
 
         void resetTexture(Camera camera)
         {
-            viewPosTexture = new RenderTexture(camera.pixelWidth, camera.scaledPixelHeight, 0, RenderTextureFormat.ARGBHalf);
-            viewPosTexture.name = "CustomPerspective_ViewPos";
-            viewPosTexture.filterMode = FilterMode.Point;
+            ViewPosTexture = new RenderTexture(camera.pixelWidth, camera.scaledPixelHeight, 0, RenderTextureFormat.ARGBHalf);
+            ViewPosTexture.name = "CustomPerspective_ViewPos";
+            ViewPosTexture.filterMode = FilterMode.Point;
         }
 
-        public Texture updateBuffer(Camera camera, RenderPath renderPath)
+        public CommandBuffer updateBuffer(Camera camera, RenderPath renderPath)
         {
             command.Clear();
 
-            if (viewPosTexture.width != camera.pixelWidth || viewPosTexture.height != camera.pixelHeight) resetTexture(camera);
+            if (ViewPosTexture.width != camera.pixelWidth || ViewPosTexture.height != camera.pixelHeight) resetTexture(camera);
 
             var path = camera.renderingPath;
             if (path == RenderingPath.Forward) renderPath = RenderPath.Forward;
@@ -46,7 +46,7 @@ namespace WCGL
             var depth = renderPath == RenderPath.Forward ?
                 BuiltinRenderTextureType.Depth : BuiltinRenderTextureType.ResolvedDepth;
 
-            command.SetRenderTarget(viewPosTexture, depth);
+            command.SetRenderTarget(ViewPosTexture, depth);
             command.ClearRenderTarget(false, true, Color.clear);
 
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
@@ -66,7 +66,7 @@ namespace WCGL
                 }
             }
 
-            return viewPosTexture;
+            return command;
         }
 
         public void enableCommandBuffer(Camera camera)

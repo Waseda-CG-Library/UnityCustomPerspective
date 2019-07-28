@@ -47,6 +47,7 @@ Shader "Hidden/CustomPerspective/Transparent/Cutout/Diffuse" {
 			#include "UnityCG.cginc"
 
 			#pragma multi_compile _ CUSTOM_PERSPECTIVE_ON
+			#pragma multi_compile _ CUSTOM_PERSPECTIVE_DEPTH_PATH
 			#include "CustomPerspective.cginc"
 
 			struct v2f {
@@ -65,11 +66,8 @@ Shader "Hidden/CustomPerspective/Transparent/Cutout/Diffuse" {
 				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
 				o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
 
-				#ifdef CUSTOM_PERSPECTIVE_ON
-				if (!any(unity_LightShadowBias)) //DepthTexture
-				{
+				#if defined(CUSTOM_PERSPECTIVE_ON) && defined(CUSTOM_PERSPECTIVE_DEPTH_PATH)
 					o.pos = ObjectToCustomClipPos(v.vertex);
-				}
 				#endif
 
 				return o;

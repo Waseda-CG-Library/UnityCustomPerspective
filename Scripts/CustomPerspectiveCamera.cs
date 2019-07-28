@@ -24,8 +24,10 @@ namespace WCGL
             }
 
             if (screenspaceShadowMap == null) Awake();
-            var viewPosTexture = screenspaceShadowMap.updateBuffer(camera, projectSettingPath);
-            Shader.SetGlobalTexture("_CustomPerspective_ViewPosTexture", viewPosTexture);
+            Shader.EnableKeyword("CUSTOM_PERSPECTIVE_DEPTH_PATH");
+            var command = screenspaceShadowMap.updateBuffer(camera, projectSettingPath);
+            command.DisableShaderKeyword("CUSTOM_PERSPECTIVE_DEPTH_PATH");
+            Shader.SetGlobalTexture("_CustomPerspective_ViewPosTexture", screenspaceShadowMap.ViewPosTexture);
             Shader.EnableKeyword("CUSTOM_PERSPECTIVE_SHADOW_ON");
 
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())

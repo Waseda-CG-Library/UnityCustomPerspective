@@ -41,6 +41,7 @@ Shader "Hidden/CustomPerspective/Vertex" {
 			#include "UnityCG.cginc"
 
 			#pragma multi_compile _ CUSTOM_PERSPECTIVE_ON
+			#pragma multi_compile _ CUSTOM_PERSPECTIVE_DEPTH_PATH
 			#include "CustomPerspective.cginc"
 
 			struct v2f {
@@ -55,11 +56,8 @@ Shader "Hidden/CustomPerspective/Vertex" {
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 				TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
 
-				#ifdef CUSTOM_PERSPECTIVE_ON
-				if (!any(unity_LightShadowBias)) //DepthTexture
-				{
+				#if defined(CUSTOM_PERSPECTIVE_ON) && defined(CUSTOM_PERSPECTIVE_DEPTH_PATH)
 					o.pos = ObjectToCustomClipPos(v.vertex);
-				}
 				#endif
 
 				return o;

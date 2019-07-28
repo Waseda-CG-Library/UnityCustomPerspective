@@ -148,11 +148,8 @@ void vertShadowCaster (VertexInput v
         #endif
     #endif
 
-    #ifdef CUSTOM_PERSPECTIVE_ON
-        if (!any(unity_LightShadowBias)) //DepthTexture
-        {
-            opos = ObjectToCustomClipPos(v.vertex);
-        }
+    #if defined(CUSTOM_PERSPECTIVE_ON) && defined(CUSTOM_PERSPECTIVE_DEPTH_PATH)
+        opos = ObjectToCustomClipPos(v.vertex);
     #endif
 }
 
