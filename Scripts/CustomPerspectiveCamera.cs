@@ -8,6 +8,7 @@ namespace WCGL
         new Camera camera;
         ScreenspaceShadowMap screenspaceShadowMap;
 
+        [Range(1.0f, 2.0f)] public float viewVolumeScale = 1.0f;
         public ScreenspaceShadowMap.RenderPath projectSettingPath = ScreenspaceShadowMap.RenderPath.Forward;
 
         void Awake()
@@ -16,8 +17,18 @@ namespace WCGL
             screenspaceShadowMap = new ScreenspaceShadowMap(camera);
         }
 
+        private void OnPreCull()
+        {
+            var proj = camera.projectionMatrix;
+            proj.m00 /= viewVolumeScale;
+            proj.m11 /= viewVolumeScale;
+            camera.projectionMatrix = proj;
+        }
+
         void OnPreRender()
         {
+            camera.ResetProjectionMatrix();
+
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
                 cpm.UpdateMatrix(camera);
