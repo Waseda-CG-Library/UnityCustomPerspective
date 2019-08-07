@@ -10,9 +10,9 @@ Vanishing Point, Point Of View, Focus のうち必要なものを作成。
 対象のカメラに CustomPerspectiveCamera をアタッチ。
 
 ### モデル用スクリプト
-対象モデルのルートに CustomPerspectiveModelをアタッチし、Vanishing Point, Point Of View, Focus のうち必要なものを設定。
-
-対象モデルの各メッシュに CustomPerspectiveMesh をアタッチし、CustomPerspectiveModel を設定。（※廃止予定）
+1. 対象モデルのルートに CustomPerspectiveModelをアタッチ
+1. Meshes に変形対象のメッシュ(Renderer)を追加
+1. Vanishing Point, Point Of View, Focus のうち必要なものを設定
 
 ---
 ## シェーダ書き換え

@@ -15,6 +15,8 @@ namespace WCGL
             return instances.Distinct().Where(cpm => cpm?.isActiveAndEnabled == true).ToArray();
         }
 
+        public Renderer[] Meshes;
+        [Space]
         public EmphasisMode EmphasisType;
         public Transform PointOfView;
         public float FocalLength = 50;
@@ -22,12 +24,12 @@ namespace WCGL
         public Transform VanishingPoint;
         [Space]
         public Transform Focus;
-        public bool correctShadow = true;
-        [SerializeField] bool correctRimLight = true;
+        public bool CorrectShadow = true;
+        public bool CorrectRimLight = true;
 
-        public HashSet<CustomPerspectiveMesh> Meshes { get; private set; } = new HashSet<CustomPerspectiveMesh>();
         public Matrix4x4 CustomMatrix { get; private set; }
         Vector3 viewDirectionCorrectWorld;
+        MaterialCache materialChace = new MaterialCache();
 
         (Matrix4x4, float) createEmphasisMatrix(Camera camera)
         {
@@ -112,8 +114,18 @@ namespace WCGL
             var proj = CustomMatrix;
             foreach (var mesh in Meshes)
             {
-                if(mesh.isActiveAndEnabled) mesh.enableCustomMatrix(ref proj, ref invVP,
-                    ref viewDirectionCorrectWorld, correctRimLight);
+                if (mesh == null || mesh.enabled == false) continue;
+
+                var mateials = materialChace.GetMaterials(mesh, true);
+                foreach (var material in mateials)
+                {
+                    if (material == null) continue;
+
+                    material.EnableKeyword("CUSTOM_PERSPECTIVE_ON");
+                    material.SetMatrix("CUSTOM_MATRIX_P", CustomMatrix);
+                    material.SetMatrix("MATRIX_I_VP", invVP);
+                    if (CorrectRimLight) material.SetVector("ViewDirectionCorrectWorld", viewDirectionCorrectWorld);
+                }
             }
         }
 
@@ -121,7 +133,13 @@ namespace WCGL
         {
             foreach (var mesh in Meshes)
             {
-                if (mesh.isActiveAndEnabled) mesh.disableCustomMatrix(correctShadow);
+                if (mesh == null || mesh.enabled == false) continue;
+
+                var mateials = materialChace.GetMaterials(mesh, false);
+                foreach (var material in mateials)
+                {
+                    if (material != null) material.DisableKeyword("CUSTOM_PERSPECTIVE_ON");
+                }
             }
         }
 

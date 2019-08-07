@@ -51,17 +51,17 @@ namespace WCGL
 
             foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
             {
-                if (cpm.correctShadow == false) continue;
+                if (cpm.CorrectShadow == false) continue;
 
                 command.SetGlobalMatrix("CUSTOM_MATRIX_P", cpm.CustomMatrix);
                 foreach (var mesh in cpm.Meshes)
                 {
-                    if (mesh.isActiveAndEnabled == false) continue;
+                    if (mesh == null || mesh.enabled == false) continue;
 
-                    int count = mesh.Renderer.sharedMaterials.Count();
+                    int count = mesh.sharedMaterials.Count();
                     for (int i = 0; i < count; i++)
                     {
-                        command.DrawRenderer(mesh.Renderer, ViewPosMaterial, i);
+                        command.DrawRenderer(mesh, ViewPosMaterial, i);
                     }
                 }
             }
