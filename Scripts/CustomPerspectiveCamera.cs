@@ -11,12 +11,6 @@ namespace WCGL
         [Range(1.0f, 2.0f)] public float viewVolumeScale = 1.0f;
         public ScreenspaceShadowMap.RenderPath projectSettingPath = ScreenspaceShadowMap.RenderPath.Forward;
 
-        void Awake()
-        {
-            camera = GetComponent<Camera>();
-            screenspaceShadowMap = new ScreenspaceShadowMap(camera);
-        }
-
         private void OnPreCull()
         {
             var proj = camera.projectionMatrix;
@@ -34,7 +28,6 @@ namespace WCGL
                 cpm.UpdateMatrix(camera);
             }
 
-            if (screenspaceShadowMap == null) Awake();
             Shader.EnableKeyword("CUSTOM_PERSPECTIVE_DEPTH_PATH");
             var command = screenspaceShadowMap.updateBuffer(camera, projectSettingPath);
             command.DisableShaderKeyword("CUSTOM_PERSPECTIVE_DEPTH_PATH");
@@ -60,7 +53,12 @@ namespace WCGL
 
         void OnEnable()
         {
-            screenspaceShadowMap?.enableCommandBuffer(camera);
+            if (screenspaceShadowMap == null)
+            {
+                camera = GetComponent<Camera>();
+                screenspaceShadowMap = new ScreenspaceShadowMap(camera);
+            }
+            screenspaceShadowMap.enableCommandBuffer(camera);
         }
 
         void OnDisable()

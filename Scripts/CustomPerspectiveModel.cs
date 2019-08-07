@@ -9,13 +9,13 @@ namespace WCGL
     {
         public enum EmphasisMode { PointOfView, FocalLength};
 
-        static List<CustomPerspectiveModel> instances = new List<CustomPerspectiveModel>();
+        static List<CustomPerspectiveModel> Instances = new List<CustomPerspectiveModel>();
         public static CustomPerspectiveModel[] GetActiveInstances()
         {
-            return instances.Distinct().Where(cpm => cpm?.isActiveAndEnabled == true).ToArray();
+            return Instances.Where(cpm => cpm?.isActiveAndEnabled == true).ToArray();
         }
 
-        public Renderer[] Meshes;
+        public List<Renderer> Meshes = new List<Renderer>();
         [Space]
         public EmphasisMode EmphasisType;
         public Transform PointOfView;
@@ -143,16 +143,14 @@ namespace WCGL
             }
         }
 
-        void Start(){ } //for GUI
-
-        void Awake()
+        void OnEnable()
         {
-            instances.Add(this);
+            if (Instances.Contains(this) == false) Instances.Add(this);
         }
 
         void OnDestroy()
         {
-            instances.Remove(this);
+            if (Instances.Contains(this) == true) Instances.Remove(this);
         }
     }
 }
