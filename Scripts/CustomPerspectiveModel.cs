@@ -100,8 +100,8 @@ namespace WCGL
             bool renderIntoTexture = version >= 5.6f;
             CustomMatrix = GL.GetGPUProjectionMatrix(proj, renderIntoTexture);
 
-            var viewXYZW = new Vector4(viewXY.x, viewXY.y, viewZ, 0);
-            viewDirectionCorrectWorld = camera.cameraToWorldMatrix.MultiplyVector(viewXYZW);
+            var viewXYZ = new Vector3(viewXY.x, viewXY.y, viewZ);
+            viewDirectionCorrectWorld = camera.cameraToWorldMatrix.MultiplyVector(viewXYZ);
         }
 
         public void EnableMatrix(Camera camera)

@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace WCGL
 {
-    public class MaterialCache
+    public struct MaterialCache
     {
-        Dictionary<Renderer, Material[]> sharedMaterialsCache = new Dictionary<Renderer, Material[]>();
+        Dictionary<Renderer, Material[]> sharedMaterialsCache;
 
         public Material[] GetMaterials(Renderer renderer, bool enableCustomPerspective)
         {
@@ -15,22 +15,25 @@ namespace WCGL
             //After render: restore sharedMaterials
             //Due to this implementation, solve editor mode problems memory leak and
             //impossible to change material values because of creating other material instances 
+
+            if (sharedMaterialsCache == null) sharedMaterialsCache = new Dictionary<Renderer, Material[]>();
+
             if (enableCustomPerspective == true)
             {
                 var sharedMaterials = renderer.sharedMaterials;
                 var tempMaterials = new Material[sharedMaterials.Length];
                 for (int i = 0; i < tempMaterials.Length; i++)
                 {
-                    tempMaterials[i] = new Material(sharedMaterials[i]);
+                    if (sharedMaterials[i] != null) tempMaterials[i] = new Material(sharedMaterials[i]);
                 }
 
                 renderer.materials = tempMaterials;
-                this.sharedMaterialsCache[renderer] = sharedMaterials;
+                sharedMaterialsCache[renderer] = sharedMaterials;
                 return tempMaterials;
             }
             else
             {
-                renderer.sharedMaterials = this.sharedMaterialsCache[renderer];
+                renderer.sharedMaterials = sharedMaterialsCache[renderer];
                 return renderer.sharedMaterials;
             }
         }
