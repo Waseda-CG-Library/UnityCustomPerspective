@@ -23,18 +23,19 @@ namespace WCGL
         {
             camera.ResetProjectionMatrix();
 
-            foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
+            var models = CustomPerspectiveModel.GetActiveInstances();
+            foreach (var cpm in models)
             {
                 cpm.UpdateMatrix(camera);
             }
 
             Shader.EnableKeyword("CUSTOM_PERSPECTIVE_DEPTH_PATH");
-            var command = screenspaceShadowMap.updateBuffer(camera, projectSettingPath);
+            var command = screenspaceShadowMap.updateBuffer(camera, projectSettingPath, models);
             command.DisableShaderKeyword("CUSTOM_PERSPECTIVE_DEPTH_PATH");
             Shader.SetGlobalTexture("_CustomPerspective_ViewPosTexture", screenspaceShadowMap.ViewPosTexture);
             Shader.EnableKeyword("CUSTOM_PERSPECTIVE_SHADOW_ON");
 
-            foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
+            foreach (var cpm in models)
             {
                 cpm.EnableMatrix(camera);
             }
