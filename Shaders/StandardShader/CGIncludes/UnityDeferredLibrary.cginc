@@ -46,6 +46,8 @@ float4 unity_LightmapFade;
 float4x4 unity_WorldToLight;
 sampler2D_float _LightTextureB0;
 
+sampler2D _CustomPerspective_ViewPosTexture;
+
 #if defined (POINT_COOKIE)
 samplerCUBE_float _LightTexture0;
 #else
@@ -156,6 +158,12 @@ void UnityDeferredCalculateLightParams (
     depth = Linear01Depth (depth);
     float4 vpos = float4(i.ray * depth,1);
     float3 wpos = mul (unity_CameraToWorld, vpos).xyz;
+
+    float4 _vpos = tex2D(_CustomPerspective_ViewPosTexture, uv);
+    if (_vpos.w == 1.0f)
+    {
+        wpos = mul(unity_CameraToWorld, _vpos).xyz;
+    }
 
     float fadeDist = UnityComputeShadowFadeDistance(wpos, vpos.z);
 

@@ -27,7 +27,7 @@ CGPROGRAM
 #pragma exclude_renderers nomrt
 
 #include "UnityCG.cginc"
-#include "UnityDeferredLibrary.cginc"
+#include "../CGIncludes/UnityDeferredLibrary.cginc"
 #include "UnityPBSLighting.cginc"
 #include "UnityStandardUtils.cginc"
 #include "UnityGBuffer.cginc"
@@ -36,8 +36,6 @@ CGPROGRAM
 sampler2D _CameraGBufferTexture0;
 sampler2D _CameraGBufferTexture1;
 sampler2D _CameraGBufferTexture2;
-
-sampler2D _CustomPerspective_ViewPosTexture;
 
 half4 CalculateLight (unity_v2f_deferred i)
 {
@@ -55,10 +53,6 @@ half4 CalculateLight (unity_v2f_deferred i)
     half4 gbuffer1 = tex2D (_CameraGBufferTexture1, uv);
     half4 gbuffer2 = tex2D (_CameraGBufferTexture2, uv);
     UnityStandardData data = UnityStandardDataFromGbuffer(gbuffer0, gbuffer1, gbuffer2);
-
-    float4 vpos = tex2D(_CustomPerspective_ViewPosTexture, uv);
-    float4 _wpos = mul(unity_CameraToWorld, vpos);
-    wpos = lerp(wpos, _wpos, vpos.w);
 
     float3 eyeVec = normalize(wpos-_WorldSpaceCameraPos);
     half oneMinusReflectivity = 1 - SpecularStrength(data.specularColor.rgb);
