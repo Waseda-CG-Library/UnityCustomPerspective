@@ -47,7 +47,7 @@
 			{
 				float2 uv = float2(i.uv.xy * _MainTex_ST.xy + _MainTex_ST.zw);
 				fixed4 col = tex2D(_MainTex, uv);
-				col *= i.diff;
+				col.xyz *= i.diff;
 				return col;
 			}
 			ENDCG
