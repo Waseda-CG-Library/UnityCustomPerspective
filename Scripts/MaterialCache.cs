@@ -3,21 +3,23 @@ using UnityEngine;
 
 namespace WCGL
 {
-    public struct MaterialCache
+    public class MaterialCache
     {
-        Dictionary<Renderer, Material[]> sharedMaterialsCache;
+        Dictionary<Renderer, Material[]> sharedMaterialsCache = new Dictionary<Renderer, Material[]>();
+        List<Material> dst = new List<Material>();
 
-        public Material[] GetMaterials(Renderer renderer, bool enableCustomPerspective)
+        public List<Material> GetMaterials(Renderer renderer, bool enableCustomPerspective)
         {
-            if (Application.isPlaying == true) return renderer.materials;
+            if (Application.isPlaying == true)
+            {
+                renderer.GetMaterials(dst);
+                return dst;
+            }
 
             //Before render: cache sharedMaterils & change sharedMaterials to other instances
             //After render: restore sharedMaterials
             //Due to this implementation, solve editor mode problems memory leak and
             //impossible to change material values because of creating other material instances 
-
-            if (sharedMaterialsCache == null) sharedMaterialsCache = new Dictionary<Renderer, Material[]>();
-
             if (enableCustomPerspective == true)
             {
                 var sharedMaterials = renderer.sharedMaterials;
@@ -29,13 +31,17 @@ namespace WCGL
 
                 renderer.materials = tempMaterials;
                 sharedMaterialsCache[renderer] = sharedMaterials;
-                return tempMaterials;
+
+                dst.Clear();
+                dst.AddRange(tempMaterials);
             }
             else
             {
                 renderer.sharedMaterials = sharedMaterialsCache[renderer];
-                return renderer.sharedMaterials;
+                renderer.GetSharedMaterials(dst);
             }
+
+            return dst;
         }
     }
 }
