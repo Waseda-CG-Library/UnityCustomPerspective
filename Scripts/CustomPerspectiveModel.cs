@@ -95,19 +95,22 @@ namespace WCGL
                 (proj, viewXY) = createOnePointMatrix(camera.worldToCameraMatrix, proj);
             }
 
-            float version = float.Parse(Application.unityVersion.Substring(0, 3));
-            bool renderIntoTexture = version >= 5.6f;
-            CustomMatrix = GL.GetGPUProjectionMatrix(proj, renderIntoTexture);
-
+#if UNITY_5_6_OR_NEWER
+            CustomMatrix = GL.GetGPUProjectionMatrix(proj, true);
+#else
+            CustomMatrix = GL.GetGPUProjectionMatrix(proj, false);
+#endif
             var viewXYZ = new Vector3(viewXY.x, viewXY.y, viewZ);
             viewDirectionCorrectWorld = camera.cameraToWorldMatrix.MultiplyVector(viewXYZ);
         }
 
         public void EnableMatrix(Camera camera)
         {
-            float version = float.Parse(Application.unityVersion.Substring(0, 3));
-            bool renderIntoTexture = version >= 5.6f;
-            Matrix4x4 unityProj = GL.GetGPUProjectionMatrix(camera.projectionMatrix, renderIntoTexture);
+#if UNITY_5_6_OR_NEWER
+            Matrix4x4 unityProj = GL.GetGPUProjectionMatrix(camera.projectionMatrix, true);
+#else
+            Matrix4x4 unityProj = GL.GetGPUProjectionMatrix(camera.projectionMatrix, false);
+#endif
             Matrix4x4 invVP = (unityProj * camera.worldToCameraMatrix).inverse;
 
             var proj = CustomMatrix;
