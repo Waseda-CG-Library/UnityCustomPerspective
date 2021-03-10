@@ -24,9 +24,9 @@ namespace WCGL
             camera.ResetProjectionMatrix();
 
             var models = CustomPerspectiveModel.GetActiveInstances();
-            foreach (var cpm in models)
+            for (int i = 0; i < models.Count; i++)
             {
-                cpm.UpdateMatrix(camera);
+                models[i].UpdateMatrix(camera);
             }
 
             Shader.EnableKeyword("CUSTOM_PERSPECTIVE_DEPTH_PATH");
@@ -35,9 +35,9 @@ namespace WCGL
             Shader.SetGlobalTexture("_CustomPerspective_ViewPosTexture", screenspaceShadowMap.ViewPosTexture);
             Shader.EnableKeyword("CUSTOM_PERSPECTIVE_SHADOW_ON");
 
-            foreach (var cpm in models)
+            for (int i = 0; i < models.Count; i++)
             {
-                cpm.EnableMatrix(camera);
+                models[i].EnableMatrix(camera);
             }
         }
 
@@ -46,9 +46,10 @@ namespace WCGL
             Shader.SetGlobalTexture("_CustomPerspective_ViewPosTexture", null);
             Shader.DisableKeyword("CUSTOM_PERSPECTIVE_SHADOW_ON");
 
-            foreach (var cpm in CustomPerspectiveModel.GetActiveInstances())
+            var models = CustomPerspectiveModel.GetActiveInstances();
+            for (int i = 0; i < models.Count; i++)
             {
-                cpm.DisableMatrix();
+                models[i].DisableMatrix();
             }
         }
 

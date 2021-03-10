@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Rendering;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace WCGL
 {
@@ -34,7 +34,7 @@ namespace WCGL
             ViewPosTexture.filterMode = FilterMode.Point;
         }
 
-        public CommandBuffer updateBuffer(Camera camera, RenderPath renderPath, CustomPerspectiveModel[] models)
+        public CommandBuffer updateBuffer(Camera camera, RenderPath renderPath, IReadOnlyList<CustomPerspectiveModel> models)
         {
             command.Clear();
 
@@ -49,20 +49,16 @@ namespace WCGL
             command.SetRenderTarget(ViewPosTexture, depth);
             command.ClearRenderTarget(false, true, Color.clear);
 
-            foreach (var cpm in models)
+            for (int i = 0; i < models.Count; i++)
             {
+                var cpm = models[i];
                 if (cpm.CorrectShadow == false) continue;
 
                 command.SetGlobalMatrix("CUSTOM_MATRIX_P", cpm.CustomMatrix);
                 foreach (var mesh in cpm.Meshes)
                 {
                     if (mesh == null || mesh.enabled == false) continue;
-
-                    int count = mesh.sharedMaterials.Count();
-                    for (int i = 0; i < count; i++)
-                    {
-                        command.DrawRenderer(mesh, ViewPosMaterial, i);
-                    }
+                    command.DrawRenderer(mesh, ViewPosMaterial);
                 }
             }
 
