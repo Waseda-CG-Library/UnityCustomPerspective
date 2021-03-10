@@ -8,11 +8,8 @@ namespace WCGL
     {
         public enum EmphasisMode { PointOfView, FocalLength};
 
-        static List<CustomPerspectiveModel> Instances = new List<CustomPerspectiveModel>();
-        public static List<CustomPerspectiveModel> GetActiveInstances()
-        {
-            return Instances;
-        }
+        private static List<CustomPerspectiveModel> Instances = new List<CustomPerspectiveModel>();
+        public static IReadOnlyList<CustomPerspectiveModel> GetActiveInstances(){ return Instances; }
 
         public List<Renderer> Meshes = new List<Renderer>();
         [Space]

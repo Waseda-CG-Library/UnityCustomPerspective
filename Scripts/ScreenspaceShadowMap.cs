@@ -34,7 +34,7 @@ namespace WCGL
             ViewPosTexture.filterMode = FilterMode.Point;
         }
 
-        public CommandBuffer updateBuffer(Camera camera, RenderPath renderPath, List<CustomPerspectiveModel> models)
+        public CommandBuffer updateBuffer(Camera camera, RenderPath renderPath, IReadOnlyList<CustomPerspectiveModel> models)
         {
             command.Clear();
 
@@ -49,8 +49,9 @@ namespace WCGL
             command.SetRenderTarget(ViewPosTexture, depth);
             command.ClearRenderTarget(false, true, Color.clear);
 
-            foreach (var cpm in models)
+            for (int i = 0; i < models.Count; i++)
             {
+                var cpm = models[i];
                 if (cpm.CorrectShadow == false) continue;
 
                 command.SetGlobalMatrix("CUSTOM_MATRIX_P", cpm.CustomMatrix);
